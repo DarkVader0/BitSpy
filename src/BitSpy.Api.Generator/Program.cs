@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using BitSpy.Api.Generator.Services;
 using OpenTelemetry;
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
@@ -11,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-var tracingOtlpEndpoint = "https://localhost:7266/test";
+var tracingOtlpEndpoint = "https://localhost:7266";
 
 using var tracerProvider = Sdk.CreateTracerProviderBuilder()
     .AddSource(builder.Environment.ApplicationName)
@@ -37,7 +38,12 @@ using var tracerProvider = Sdk.CreateTracerProviderBuilder()
             activity.SetTag("stackTrace", exception.StackTrace);
         };
     })
-    .AddOtlpExporter(otlpOptions => { otlpOptions.Endpoint = new Uri(tracingOtlpEndpoint); })
+    .AddOtlpExporter(otlpOptions =>
+    {
+        otlpOptions.Endpoint = new Uri(tracingOtlpEndpoint);
+        otlpOptions.ExportProcessorType = ExportProcessorType.Simple;
+        otlpOptions.Protocol = OtlpExportProtocol.Grpc;
+    })
     .AddConsoleExporter()
     .Build();
 

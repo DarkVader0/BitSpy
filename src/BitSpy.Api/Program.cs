@@ -1,6 +1,14 @@
+using BitSpy.Api.Protos;
+
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddGrpc();
+
 
 var app = builder.Build();
+
+app.MapGrpcService<OtlpService>();
+
+
 
 app.MapPost("/test", async ctx =>
 {
