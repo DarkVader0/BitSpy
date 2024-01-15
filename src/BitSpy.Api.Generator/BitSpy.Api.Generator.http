@@ -1,0 +1,6 @@
+@BitSpy.Api.Generator_HostAddress = http://localhost:5164
+
+GET {{BitSpy.Api.Generator_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

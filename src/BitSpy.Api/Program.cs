@@ -1,13 +1,19 @@
 var builder = WebApplication.CreateBuilder(args);
 
-// Swagger
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
 var app = builder.Build();
 
-// Swagger
-app.UseSwagger();
-app.UseSwaggerUI();
+app.MapPost("/test", async ctx =>
+{
+    var request = ctx.Request;
+    using var reader = new StreamReader(request.Body);
+    var body = await reader.ReadToEndAsync();
+    Console.WriteLine("Received telemetry:");
+    Console.WriteLine(body);
+
+    // body contains the telemetry data sent by the OpenTelemetry exporter
+    // You can now process this data as needed
+
+    Results.Ok();
+});
 
 app.Run();

@@ -2,6 +2,8 @@
 BitSpy.sln
 src/BitSpy.Api/bin
 src/BitSpy.Api/obj
+src/BitSpy.Api.Generator/bin
+src/BitSpy.Api.Generator/obj
 src/BitSpy.Ui/bin
 src/BitSpy.Ui/obj
 tests/BitSpy.Api.Tests.Integration/bin
