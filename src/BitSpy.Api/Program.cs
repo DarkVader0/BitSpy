@@ -1,16 +1,14 @@
 using BitSpy.Api.Protos;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddGrpc();
 
+builder.Services.AddGrpc();
 
 var app = builder.Build();
 
 app.MapGrpcService<OtlpService>();
 
-
-
-app.MapPost("/test", async ctx =>
+app.MapPost("/", async ctx =>
 {
     var request = ctx.Request;
     using var reader = new StreamReader(request.Body);

@@ -20,7 +20,7 @@ using var tracerProvider = Sdk.CreateTracerProviderBuilder()
         ResourceBuilder.CreateDefault()
             .AddService(serviceName: builder.Environment.ApplicationName, serviceVersion: "1.0.0"))
     .AddAspNetCoreInstrumentation()
-    .AddHttpClientInstrumentation((options) =>
+    .AddGrpcClientInstrumentation(options =>
     {
         // Note: Only called on .NET & .NET Core runtimes.
         options.EnrichWithHttpRequestMessage = (activity, httpRequestMessage) =>
@@ -31,11 +31,6 @@ using var tracerProvider = Sdk.CreateTracerProviderBuilder()
         options.EnrichWithHttpResponseMessage = (activity, httpResponseMessage) =>
         {
             activity.SetTag("responseVersion", httpResponseMessage.Version);
-        };
-        // Note: Called for all runtimes.
-        options.EnrichWithException = (activity, exception) =>
-        {
-            activity.SetTag("stackTrace", exception.StackTrace);
         };
     })
     .AddOtlpExporter(otlpOptions =>
