@@ -2,6 +2,6 @@
 
 public sealed class LogRequest
 {
-    public required string LogTemplate { get; set; }
-    public required List<string> LogValues { get; set; }
+    public required string LogTemplate { get; init; }
+    public required List<string> LogValues { get; init; }
 }
