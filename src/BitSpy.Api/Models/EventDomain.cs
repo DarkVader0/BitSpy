@@ -1,6 +1,9 @@
 ﻿namespace BitSpy.Api.Models;
 
-public class EventDomain
+public sealed class EventDomain
 {
-    
+    public required string Name { get; init; }
+    public required string Message { get; init; }
+    public required DateTime Timestamp { get; init; }
+    public required List<AttributeDomain> Attributes { get; init; } = new();
 }

@@ -11,7 +11,7 @@ public sealed class TraceService : ITraceService
     {
         _traceRepository = traceRepository;
     }
-    
+
     public async Task<bool> SaveAsync(TraceDomain trace)
     {
         throw new NotImplementedException();

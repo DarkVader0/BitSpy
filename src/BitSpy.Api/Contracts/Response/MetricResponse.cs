@@ -1,6 +1,6 @@
-﻿namespace BitSpy.Api.Models;
+﻿namespace BitSpy.Api.Contracts.Response;
 
-public class MetricDomain
+public sealed class MetricResponse
 {
     public required string Name { get; init; }
     public required decimal TimeInGCSinceLastGCPercentage { get; init; }

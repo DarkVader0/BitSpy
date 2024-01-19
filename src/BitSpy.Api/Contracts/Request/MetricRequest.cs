@@ -17,4 +17,5 @@ public sealed class MetricRequest
     public required uint ThreadPoolQueueLength { get; init; }
     public required uint ThreadPoolThreadCount { get; init; }
     public required uint WorkingSet { get; init; }
+    public required DateTime Timestamp { get; init; }
 }

@@ -1,6 +1,10 @@
 ﻿namespace BitSpy.Api.Models;
 
-public class TraceDomain
+public sealed class TraceDomain
 {
-    
+    public required string Name { get; init; }
+    public required DateTime StartTime { get; init; }
+    public required DateTime EndTime { get; init; }
+    public List<AttributeDomain> Attributes { get; init; } = new();
+    public List<EventDomain> Events { get; init; } = new();
 }

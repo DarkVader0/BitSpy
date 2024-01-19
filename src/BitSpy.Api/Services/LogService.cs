@@ -11,29 +11,35 @@ public sealed class LogService : ILogService
     {
         _logRepository = logRepository;
     }
-    
+
     public async Task<bool> SaveAsync(LogDomain log)
     {
-        throw new NotImplementedException();
+        return await _logRepository.SaveAsync(log);
     }
 
-    public async Task<IEnumerable<LogDomain>> GetLogsAsync()
+    public async Task<IEnumerable<LogDomain>> GetLogsAsync(DateTime startingTimestamp, DateTime endingTimestamp)
     {
-        throw new NotImplementedException();
+        return await _logRepository.GetLogsAsync(startingTimestamp, endingTimestamp);
     }
 
-    public async Task<LogDomain> GetLogAsync(string id)
+    public async Task<LogDomain?> GetLogAsync(string level, DateTime timestamp, string logTemplate)
     {
-        throw new NotImplementedException();
+        return await _logRepository.GetLogAsync(level, timestamp, logTemplate); 
     }
 
     public async Task<bool> UpdateAsync(LogDomain log)
     {
-        throw new NotImplementedException();
+        var existingLog = await _logRepository.GetLogAsync(log.Level, log.Timestamp, log.LogTemplate);
+        if (existingLog is null)
+            return false;
+        return await _logRepository.UpdateAsync(log);
     }
 
-    public async Task<bool> DeleteAsync(string id)
+    public async Task<bool> DeleteAsync(string level, DateTime timestamp, string logTemplate)
     {
-        throw new NotImplementedException();
+        var existingLog = await _logRepository.GetLogAsync(level, timestamp, logTemplate);
+        if (existingLog is null)
+            return false;
+        return await _logRepository.DeleteAsync(level, timestamp, logTemplate);
     }
 }

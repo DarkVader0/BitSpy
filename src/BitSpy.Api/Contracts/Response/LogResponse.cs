@@ -1,6 +1,6 @@
-﻿namespace BitSpy.Api.Contracts.Request;
+﻿namespace BitSpy.Api.Contracts.Response;
 
-public sealed class LogRequest
+public sealed class LogResponse
 {
     public required string Level { get; init; }
     public required string LogTemplate { get; init; }
