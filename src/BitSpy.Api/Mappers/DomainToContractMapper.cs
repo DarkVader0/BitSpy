@@ -34,4 +34,30 @@ public static class DomainToContractMapper
             WorkingSet = domain.WorkingSet,
             Timestamp = domain.Timestamp
         };
+    
+    public static TraceResponse ToContract(this TraceDomain domain)
+        => new()
+        {
+            Name = domain.Name,
+            StartTime = domain.StartTime,
+            EndTime = domain.EndTime,
+            Attributes = domain.Attributes.Select(x => x.ToContract()).ToList(),
+            Events = domain.Events.Select(x => x.ToContract()).ToList()
+        };
+
+    public static AttributeResponse ToContract(this AttributeDomain domain)
+        => new()
+        {
+            Name = domain.Name,
+            Value = domain.Value
+        };
+    
+    public static EventResponse ToContract(this EventDomain domain)
+        => new()
+        {
+            Name = domain.Name,
+            Message = domain.Message,
+            Timestamp = domain.Timestamp,
+            Attributes = domain.Attributes.Select(x => x.ToContract()).ToList()
+        };
 }

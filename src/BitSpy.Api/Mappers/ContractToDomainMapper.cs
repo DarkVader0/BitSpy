@@ -34,4 +34,30 @@ public static class ContractToDomainMapper
             WorkingSet = request.WorkingSet,
             Timestamp = request.Timestamp
         };
+
+    public static TraceDomain ToDomain(this TraceRequest request)
+        => new()
+        {
+            Name = request.Name,
+            StartTime = request.StartTime,
+            EndTime = request.EndTime,
+            Attributes = request.Attributes.Select(x => x.ToDomain()).ToList(),
+            Events = request.Events.Select(x => x.ToDomain()).ToList()
+        };
+
+    public static AttributeDomain ToDomain(this AttributeRequest request)
+        => new()
+        {
+            Name = request.Name,
+            Value = request.Value
+        };
+    
+    public static EventDomain ToDomain(this EventRequest request)
+        => new()
+        {
+            Name = request.Name,
+            Message = request.Message,
+            Timestamp = request.Timestamp,
+            Attributes = request.Attributes.Select(x => x.ToDomain()).ToList()
+        };
 }
