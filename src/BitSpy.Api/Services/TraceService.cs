@@ -14,26 +14,34 @@ public sealed class TraceService : ITraceService
 
     public async Task<bool> SaveAsync(TraceDomain trace)
     {
-        throw new NotImplementedException();
+        return await _traceRepository.SaveAsync(trace);
     }
 
-    public async Task<IEnumerable<TraceDomain>> GetTracesAsync()
+    public async Task<IEnumerable<TraceDomain>> GetTracesAsync(string name)
     {
-        throw new NotImplementedException();
+        return await _traceRepository.GetTracesAsync(name);
     }
 
-    public async Task<TraceDomain> GetTraceAsync(string id)
+    public async Task<TraceDomain?> GetTraceAsync(string name)
     {
-        throw new NotImplementedException();
+        return await _traceRepository.GetTraceAsync(name);
     }
 
     public async Task<bool> UpdateAsync(TraceDomain trace)
     {
-        throw new NotImplementedException();
+        var existingTrace = await _traceRepository.GetTraceAsync(trace.Name);
+        if (existingTrace is null)
+            return false;
+        
+        return await _traceRepository.UpdateAsync(trace);
     }
 
     public async Task<bool> DeleteAsync(string id)
     {
-        throw new NotImplementedException();
+        var existingTrace = await _traceRepository.GetTraceAsync(id);
+        if (existingTrace is null)
+            return false;
+        
+        return await _traceRepository.DeleteAsync(id);
     }
 }

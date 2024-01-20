@@ -57,7 +57,7 @@ public class MetricRepository : IMetricRepository
         });
     }
 
-    public async Task<MetricDomain> GetMetricAsync(string name,
+    public async Task<MetricDomain?> GetMetricAsync(string name,
         decimal cpuUsage,
         DateTime timestamp)
     {
@@ -66,6 +66,8 @@ public class MetricRepository : IMetricRepository
         var bound = query.Bind(name, cpuUsage, timestamp);
         var result = await _session.ExecuteAsync(bound);
         var row = result.FirstOrDefault();
+        if (row is null)
+            return null;
         return new MetricDomain
         {
             Name = row.GetValue<string>("name"),

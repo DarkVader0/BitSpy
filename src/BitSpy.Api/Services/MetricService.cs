@@ -14,26 +14,32 @@ public sealed class MetricService : IMetricService
     
     public async Task<bool> SaveAsync(MetricDomain metric)
     {
-        throw new NotImplementedException();
+        return await _metricRepository.SaveAsync(metric);
     }
 
-    public async Task<IEnumerable<MetricDomain>> GetMetricsAsync()
+    public async Task<IEnumerable<MetricDomain>> GetMetricsAsync(DateTime startingTimestamp, DateTime endingTimestamp)
     {
-        throw new NotImplementedException();
+        return await _metricRepository.GetMetricsAsync(startingTimestamp, endingTimestamp);
     }
 
-    public async Task<MetricDomain> GetMetricAsync(string id)
+    public async Task<MetricDomain?> GetMetricAsync(string name, decimal cpuUsage, DateTime timestamp)
     {
-        throw new NotImplementedException();
+        return await _metricRepository.GetMetricAsync(name, cpuUsage, timestamp);
     }
 
     public async Task<bool> UpdateAsync(MetricDomain metric)
     {
-        throw new NotImplementedException();
+        var existingMetric = await _metricRepository.GetMetricAsync(metric.Name, metric.CPUUsage, metric.Timestamp);
+        if (existingMetric is null)
+            return false;
+        return await _metricRepository.UpdateAsync(metric);
     }
 
-    public async Task<bool> DeleteAsync(string id)
+    public async Task<bool> DeleteAsync(string name, decimal cpuUsage, DateTime timestamp)
     {
-        throw new NotImplementedException();
+        var existingMetric = await _metricRepository.GetMetricAsync(name, cpuUsage, timestamp);
+        if (existingMetric is null)
+            return false;
+        return await _metricRepository.DeleteAsync(name, cpuUsage, timestamp);
     }
 }

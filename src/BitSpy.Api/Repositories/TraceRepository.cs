@@ -31,10 +31,10 @@ public class TraceRepository : ITraceRepository
         });
     }
 
-    public async Task<TraceDomain?> GetTraceAsync(string id)
+    public async Task<TraceDomain?> GetTraceAsync(string name)
     {
         var session = _driver.AsyncSession();
-        var result = await session.RunAsync($"MATCH (t:Trace) WHERE t.id = '{id}' RETURN t");
+        var result = await session.RunAsync($"MATCH (t:Trace) WHERE t.name = '{name}' RETURN t");
         var r = await result.SingleAsync();
         if (r is null)
             return null;
