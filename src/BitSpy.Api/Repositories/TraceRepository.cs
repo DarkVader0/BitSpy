@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Globalization;
+using System.Text.Json;
 using BitSpy.Api.Models;
 using Neo4j.Driver;
 
@@ -19,33 +20,33 @@ public class TraceRepository : ITraceRepository
     public async Task<IEnumerable<TraceDomain>> GetTracesAsync(string startingMethod)
     {
         var session = _driver.AsyncSession();
-        var result = await session.RunAsync($"MATCH (t:Trace) WHERE t.name STARTS WITH '{startingMethod}' RETURN t");
+        var result = await session.RunAsync($"MATCH (t:Trace) WHERE t.Name STARTS WITH '{startingMethod}' RETURN t");
         var records = await result.ToListAsync();
         return records.Select(r => new TraceDomain
         {
             Name = r["t"].As<INode>().Properties["Name"].As<string>(),
-            StartTime = r["t"].As<INode>().Properties["StartTime"].As<DateTime>(),
-            EndTime = r["t"].As<INode>().Properties["EndTime"].As<DateTime>(),
-            Attributes = r["t"].As<INode>().Properties["Attributes"].As<List<AttributeDomain>>(),
-            Events = r["t"].As<INode>().Properties["Events"].As<List<EventDomain>>()
+            StartTime = DateTime.Parse(r["t"].As<INode>().Properties["StartTime"].As<ZonedDateTime>().ToString()),
+            EndTime = DateTime.Parse(r["t"].As<INode>().Properties["EndTime"].As<ZonedDateTime>().ToString()),
+            Attributes = JsonSerializer.Deserialize<List<AttributeDomain>>(r["t"].As<INode>().Properties["Attributes"].As<string>())!,
+            Events = JsonSerializer.Deserialize<List<EventDomain>>(r["t"].As<INode>().Properties["Events"].As<string>())!
         });
     }
 
     public async Task<TraceDomain?> GetTraceAsync(string name)
     {
         var session = _driver.AsyncSession();
-        var result = await session.RunAsync($"MATCH (t:Trace) WHERE t.name = '{name}' RETURN t");
-        var r = await result.SingleAsync();
+        var result = await session.RunAsync($"MATCH (t:Trace) WHERE t.Name = '{name}' RETURN t");
+        var r = (await result.ToListAsync()).FirstOrDefault();
         if (r is null)
             return null;
 
         return new TraceDomain
         {
             Name = r["t"].As<INode>().Properties["Name"].As<string>(),
-            StartTime = r["t"].As<INode>().Properties["StartTime"].As<DateTime>(),
-            EndTime = r["t"].As<INode>().Properties["EndTime"].As<DateTime>(),
-            Attributes = r["t"].As<INode>().Properties["Attributes"].As<List<AttributeDomain>>(),
-            Events = r["t"].As<INode>().Properties["Events"].As<List<EventDomain>>()
+            StartTime = DateTime.Parse(r["t"].As<INode>().Properties["StartTime"].As<ZonedDateTime>().ToString()),
+            EndTime = DateTime.Parse(r["t"].As<INode>().Properties["EndTime"].As<ZonedDateTime>().ToString()),
+            Attributes = JsonSerializer.Deserialize<List<AttributeDomain>>(r["t"].As<INode>().Properties["Attributes"].As<string>())!,
+            Events = JsonSerializer.Deserialize<List<EventDomain>>(r["t"].As<INode>().Properties["Events"].As<string>())!
         };
     }
 
@@ -57,8 +58,8 @@ public class TraceRepository : ITraceRepository
             new Dictionary<string, object>
             {
                 {"name", trace.Name},
-                {"startTime", trace.StartTime.ToString("O")},
-                {"endTime", trace.EndTime.ToString("O")},
+                {"startTime", trace.StartTime.ToString("yyyy-MM-ddTHH\\:mm\\:ss.fffffffzzz", CultureInfo.InvariantCulture)},
+                {"endTime", trace.EndTime.ToString("yyyy-MM-ddTHH\\:mm\\:ss.fffffffzzz", CultureInfo.InvariantCulture)},
                 {"attributes", JsonSerializer.Serialize(trace.Attributes)},
                 {"events", JsonSerializer.Serialize(trace.Events)}
             });
@@ -70,7 +71,7 @@ public class TraceRepository : ITraceRepository
     {
         var session = _driver.AsyncSession();
         var result = await session.RunAsync(
-            "MATCH (t:Trace) WHERE t.name = $name SET t = {Name: $name, StartTime: datetime($startTime), EndTime: datetime($endTime), Attributes: $attributes, Events: $events}",
+            "MATCH (t:Trace) WHERE t.Name = $name SET t = {Name: $name, StartTime: datetime($startTime), EndTime: datetime($endTime), Attributes: $attributes, Events: $events}",
             new Dictionary<string, object>
             {
                 {"name", trace.Name},
@@ -86,7 +87,7 @@ public class TraceRepository : ITraceRepository
     public async Task<bool> DeleteAsync(string name)
     {
         var session = _driver.AsyncSession();
-        var result = await session.RunAsync($"MATCH (t:Trace) WHERE t.name = '{name}' DELETE t");
+        var result = await session.RunAsync($"MATCH (t:Trace) WHERE t.Name = '{name}' DELETE t");
         return true;
     }
 }

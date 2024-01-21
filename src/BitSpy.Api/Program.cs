@@ -1,3 +1,4 @@
+using BitSpy.Api;
 using BitSpy.Api.Endpoints.Internal;
 using BitSpy.Api.Middleware;
 using BitSpy.Api.Repositories;
@@ -18,6 +19,7 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+await DatabaseInitializer.InitializeAsync(builder.Configuration);
 app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseSwagger();
 app.UseSwaggerUI();

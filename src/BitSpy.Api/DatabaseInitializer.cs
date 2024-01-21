@@ -14,9 +14,33 @@ public static class DatabaseInitializer
             .WithPort(int.Parse(configuration["Cassandra:Port"]!))
             .Build();
 
-        _session = await cluster.ConnectAsync(configuration["Cassandra:Keyspace"]);
+        _session = await cluster.ConnectAsync();
+        
+        var keyspace = configuration["Cassandra:Keyspace"]!;
+        
+        if (!await KeyspaceExistsAsync(cluster, keyspace))
+        {
+            // Keyspace doesn't exist, create it
+            await CreateKeyspaceAsync(cluster, keyspace);
+        }
+        _session = await cluster.ConnectAsync(keyspace);
         await CreateMetricsTableAsync();
         await CreateLogsTableAsync();
+    }
+    
+    private static async Task<bool> KeyspaceExistsAsync(ICluster cluster, string keyspace)
+    {
+        // Check if the keyspace exists
+        var keyspaces = cluster.Metadata.GetKeyspaces().ToList();
+        return keyspaces.Contains(keyspace.ToLower());
+    }
+
+    private static async Task CreateKeyspaceAsync(ICluster cluster, string keyspace)
+    {
+        // Create the keyspace
+        var query = await  _session.PrepareAsync($"CREATE KEYSPACE {keyspace} WITH replication = {{'class': 'SimpleStrategy', 'replication_factor': 1}}");
+        var bond = query.Bind();
+        await _session.ExecuteAsync(bond);
     }
 
     private static async Task CreateMetricsTableAsync()

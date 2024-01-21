@@ -29,8 +29,8 @@ public class TraceEndpoints : IEndpoint
         [FromRoute] string name,
         ITraceService traceService)
     {
-        var result = await traceService.GetTracesAsync(name);
-        return Results.Ok(result);
+        var result = await traceService.GetTraceAsync(name);
+        return result is null ? Results.NotFound() : Results.Ok(result);
     }
 
     private static async Task<IResult> GetAllTraces(
