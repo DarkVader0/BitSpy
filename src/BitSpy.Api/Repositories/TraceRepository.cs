@@ -51,19 +51,29 @@ public class TraceRepository : ITraceRepository
 
     public async Task<bool> SaveAsync(TraceDomain trace)
     {
-        var session = _driver.AsyncSession();
-        var result = await session.RunAsync(
-            "CREATE (t:Trace {Name: $name, StartTime: datetime($startTime), EndTime: datetime($endTime), Attributes: $attributes, Events: $events})",
-            new Dictionary<string, object>
-            {
-                {"name", trace.Name},
-                {"startTime", trace.StartTime.ToString("O")},
-                {"endTime", trace.EndTime.ToString("O")},
-                {"attributes", JsonSerializer.Serialize(trace.Attributes)},
-                {"events", JsonSerializer.Serialize(trace.Events)}
-            });
+        try
+        {
+            var session = _driver.AsyncSession();
+            var result = await session.RunAsync(
+                "CREATE (t:Trace {Name: $name, StartTime: datetime($startTime), EndTime: datetime($endTime), Attributes: $attributes, Events: $events})",
+                new Dictionary<string, object>
+                {
+                    { "name", trace.Name },
+                    { "startTime", trace.StartTime.ToString("O") },
+                    { "endTime", trace.EndTime.ToString("O") },
+                    { "attributes", JsonSerializer.Serialize(trace.Attributes) },
+                    { "events", JsonSerializer.Serialize(trace.Events) }
+                });
 
-        return true;
+            
+            
+            return true;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
     public async Task<bool> UpdateAsync(TraceDomain trace)
@@ -73,13 +83,13 @@ public class TraceRepository : ITraceRepository
             "MATCH (t:Trace) WHERE t.name = $name SET t = {Name: $name, StartTime: datetime($startTime), EndTime: datetime($endTime), Attributes: $attributes, Events: $events}",
             new Dictionary<string, object>
             {
-                {"name", trace.Name},
-                {"startTime", trace.StartTime.ToString("O")},
-                {"endTime", trace.EndTime.ToString("O")},
-                {"attributes", JsonSerializer.Serialize(trace.Attributes)},
-                {"events", JsonSerializer.Serialize(trace.Events)}
+                { "name", trace.Name },
+                { "startTime", trace.StartTime.ToString("O") },
+                { "endTime", trace.EndTime.ToString("O") },
+                { "attributes", JsonSerializer.Serialize(trace.Attributes) },
+                { "events", JsonSerializer.Serialize(trace.Events) }
             });
-        
+
         return true;
     }
 

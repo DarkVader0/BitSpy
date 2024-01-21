@@ -1,14 +1,11 @@
-﻿using System.Runtime.InteropServices.JavaScript;
-using BitSpy.Api.Contracts.Request;
+﻿using BitSpy.Api.Contracts.Request;
 using BitSpy.Api.Endpoints.Internal;
 using BitSpy.Api.Mappers;
-using BitSpy.Api.Repositories;
 using BitSpy.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BitSpy.Api.Endpoints;
 
-//TODO: handle returns better
 public class MetricEndpoints : IEndpoint
 {
     private const string BaseRoute = "/metrics";
