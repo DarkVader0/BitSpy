@@ -48,7 +48,7 @@ public static class DatabaseInitializer
         var query = @"CREATE TABLE IF NOT EXISTS metrics (
                         name text,
                         timeInGCSinceLastGCPercentage decimal,
-                        allocationRatePerSecond bigint,
+                        allocationRatePerSecond int,
                         cpuUsage decimal,
                         exceptionCount int,
                         gen0CollectionCount int,
@@ -56,7 +56,7 @@ public static class DatabaseInitializer
                         gen1CollectionCount int,
                         gen1Size bigint,
                         gen2CollectionCount int,
-                        gen2Size bigint,
+                        gen2Size int,
                         threadPoolCompletedItemsCount int,
                         threadPoolQueueLength int,
                         threadPoolThreadCount int,
