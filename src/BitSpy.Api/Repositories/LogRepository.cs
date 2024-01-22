@@ -28,21 +28,21 @@ public class LogRepository : ILogRepository
 
     public async Task<IEnumerable<LogDomain>> GetLogsAsync(DateTime startingTimestamp, DateTime endingTimestamp)
     {
-        var query = await _session.PrepareAsync("SELECT * FROM logs WHERE timestamp >= ? AND timestamp <= ?");
+        var query = await _session.PrepareAsync("SELECT * FROM logs WHERE timestamp >= ? AND timestamp <= ? ALLOW FILTERING");
         var bound = query.Bind(startingTimestamp, endingTimestamp);
         var result = await _session.ExecuteAsync(bound);
         return result.Select(row => new LogDomain
         {
             Level = row.GetValue<string>("level"),
-            LogTemplate = row.GetValue<string>("logTemplate"),
-            LogValues = row.GetValue<List<string>>("logValues"),
+            LogTemplate = row.GetValue<string>("logTemplate".ToLower()),
+            LogValues = row.GetValue<List<string>>("logValues".ToLower()),
             Timestamp = row.GetValue<DateTime>("timestamp")
         });
     }
 
     public async Task<LogDomain?> GetLogAsync(string level, DateTime timestamp, string logTemplate)
     {
-        var query = await _session.PrepareAsync("SELECT * FROM logs WHERE level = ? AND timestamp = ? AND logTemplate = ?");
+        var query = await _session.PrepareAsync("SELECT * FROM logs WHERE level = ? AND timestamp = ? AND logTemplate = ? ALLOW FILTERING");
         var bound = query.Bind(level, timestamp, logTemplate);
         var result = await _session.ExecuteAsync(bound);
         var row = result.FirstOrDefault();
@@ -51,8 +51,8 @@ public class LogRepository : ILogRepository
         return new LogDomain
         {
             Level = row.GetValue<string>("level"),
-            LogTemplate = row.GetValue<string>("logTemplate"),
-            LogValues = row.GetValue<List<string>>("logValues"),
+            LogTemplate = row.GetValue<string>("logTemplate".ToLower()),
+            LogValues = row.GetValue<List<string>>("logValues".ToLower()),
             Timestamp = row.GetValue<DateTime>("timestamp")
         };
     }

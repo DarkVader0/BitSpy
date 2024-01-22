@@ -33,27 +33,27 @@ public class MetricRepository : IMetricRepository
 
     public async Task<IEnumerable<MetricDomain>> GetMetricsAsync(DateTime startingTimestamp, DateTime endingTimestamp)
     {
-        var query = await _session.PrepareAsync("SELECT * FROM metrics WHERE timestamp >= ? AND timestamp <= ?");
+        var query = await _session.PrepareAsync("SELECT * FROM metrics WHERE timestamp >= ? AND timestamp <= ? ALLOW FILTERING");
         var bound = query.Bind(startingTimestamp, endingTimestamp);
         var result = await _session.ExecuteAsync(bound);
         return result.Select(row => new MetricDomain
         {
             Name = row.GetValue<string>("name"),
-            TimeInGCSinceLastGCPercentage = row.GetValue<decimal>("timeInGCSinceLastGCPercentage"),
-            AllocationRatePerSecond = row.GetValue<ulong>("allocationRatePerSecond"),
-            CPUUsage = row.GetValue<decimal>("cpuUsage"),
-            ExceptionCount = row.GetValue<uint>("exceptionCount"),
-            Gen0CollectionCount = row.GetValue<uint>("gen0CollectionCount"),
-            Gen0Size = row.GetValue<ulong>("gen0Size"),
-            Gen1CollectionCount = row.GetValue<uint>("gen1CollectionCount"),
-            Gen1Size = row.GetValue<ulong>("gen1Size"),
-            Gen2CollectionCount = row.GetValue<uint>("gen2CollectionCount"),
-            Gen2Size = row.GetValue<ulong>("gen2Size"),
-            ThreadPoolCompletedItemsCount = row.GetValue<uint>("threadPoolCompletedItemsCount"),
-            ThreadPoolQueueLength = row.GetValue<uint>("threadPoolQueueLength"),
-            ThreadPoolThreadCount = row.GetValue<uint>("threadPoolThreadCount"),
-            WorkingSet = row.GetValue<uint>("workingSet"),
-            Timestamp = row.GetValue<DateTime>("timestamp")
+            TimeInGCSinceLastGCPercentage = row.GetValue<decimal>("timeInGCSinceLastGCPercentage".ToLower()),
+            AllocationRatePerSecond = row.GetValue<ulong>("allocationRatePerSecond".ToLower()),
+            CPUUsage = row.GetValue<decimal>("cpuUsage".ToLower()),
+            ExceptionCount = row.GetValue<uint>("exceptionCount".ToLower()),
+            Gen0CollectionCount = row.GetValue<uint>("gen0CollectionCount".ToLower()),
+            Gen0Size = row.GetValue<ulong>("gen0Size".ToLower()),
+            Gen1CollectionCount = row.GetValue<uint>("gen1CollectionCount".ToLower()),
+            Gen1Size = row.GetValue<ulong>("gen1Size".ToLower()),
+            Gen2CollectionCount = row.GetValue<uint>("gen2CollectionCount".ToLower()),
+            Gen2Size = row.GetValue<ulong>("gen2Size".ToLower()),
+            ThreadPoolCompletedItemsCount = row.GetValue<uint>("threadPoolCompletedItemsCount".ToLower()),
+            ThreadPoolQueueLength = row.GetValue<uint>("threadPoolQueueLength".ToLower()),
+            ThreadPoolThreadCount = row.GetValue<uint>("threadPoolThreadCount".ToLower()),
+            WorkingSet = row.GetValue<uint>("workingSet".ToLower()),
+            Timestamp = row.GetValue<DateTime>("timestamp".ToLower())
         });
     }
 
@@ -62,7 +62,7 @@ public class MetricRepository : IMetricRepository
         DateTime timestamp)
     {
         var query = await _session.PrepareAsync(
-            "SELECT * FROM metrics WHERE name = ? AND cpuUsage = ? AND timestamp = ?");
+            "SELECT * FROM metrics WHERE name = ? AND cpuUsage = ? AND timestamp = ? ALLOW FILTERING");
         var bound = query.Bind(name, cpuUsage, timestamp);
         var result = await _session.ExecuteAsync(bound);
         var row = result.FirstOrDefault();
@@ -71,21 +71,21 @@ public class MetricRepository : IMetricRepository
         return new MetricDomain
         {
             Name = row.GetValue<string>("name"),
-            TimeInGCSinceLastGCPercentage = row.GetValue<decimal>("timeInGCSinceLastGCPercentage"),
-            AllocationRatePerSecond = row.GetValue<ulong>("allocationRatePerSecond"),
-            CPUUsage = row.GetValue<decimal>("cpuUsage"),
-            ExceptionCount = row.GetValue<uint>("exceptionCount"),
-            Gen0CollectionCount = row.GetValue<uint>("gen0CollectionCount"),
-            Gen0Size = row.GetValue<ulong>("gen0Size"),
-            Gen1CollectionCount = row.GetValue<uint>("gen1CollectionCount"),
-            Gen1Size = row.GetValue<ulong>("gen1Size"),
-            Gen2CollectionCount = row.GetValue<uint>("gen2CollectionCount"),
-            Gen2Size = row.GetValue<ulong>("gen2Size"),
-            ThreadPoolCompletedItemsCount = row.GetValue<uint>("threadPoolCompletedItemsCount"),
-            ThreadPoolQueueLength = row.GetValue<uint>("threadPoolQueueLength"),
-            ThreadPoolThreadCount = row.GetValue<uint>("threadPoolThreadCount"),
-            WorkingSet = row.GetValue<uint>("workingSet"),
-            Timestamp = row.GetValue<DateTime>("timestamp")
+            TimeInGCSinceLastGCPercentage = row.GetValue<decimal>("timeInGCSinceLastGCPercentage".ToLower()),
+            AllocationRatePerSecond = row.GetValue<ulong>("allocationRatePerSecond".ToLower()),
+            CPUUsage = row.GetValue<decimal>("cpuUsage".ToLower()),
+            ExceptionCount = row.GetValue<uint>("exceptionCount".ToLower()),
+            Gen0CollectionCount = row.GetValue<uint>("gen0CollectionCount".ToLower()),
+            Gen0Size = row.GetValue<ulong>("gen0Size".ToLower()),
+            Gen1CollectionCount = row.GetValue<uint>("gen1CollectionCount".ToLower()),
+            Gen1Size = row.GetValue<ulong>("gen1Size".ToLower()),
+            Gen2CollectionCount = row.GetValue<uint>("gen2CollectionCount".ToLower()),
+            Gen2Size = row.GetValue<ulong>("gen2Size".ToLower()),
+            ThreadPoolCompletedItemsCount = row.GetValue<uint>("threadPoolCompletedItemsCount".ToLower()),
+            ThreadPoolQueueLength = row.GetValue<uint>("threadPoolQueueLength".ToLower()),
+            ThreadPoolThreadCount = row.GetValue<uint>("threadPoolThreadCount".ToLower()),
+            WorkingSet = row.GetValue<uint>("workingSet".ToLower()),
+            Timestamp = row.GetValue<DateTime>("timestamp".ToLower())
         };
     }
 
