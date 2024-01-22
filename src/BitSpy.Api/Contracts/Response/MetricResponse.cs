@@ -3,9 +3,9 @@
 public sealed class MetricResponse
 {
     public required string Name { get; init; }
-    public required decimal TimeInGCSinceLastGCPercentage { get; init; }
+    public required double TimeInGCSinceLastGCPercentage { get; init; }
     public required int AllocationRatePerSecond { get; init; }
-    public required decimal CPUUsage { get; init; }
+    public required double CPUUsage { get; init; }
     public required int ExceptionCount { get; init; }
     public required int Gen0CollectionCount { get; init; }
     public required int Gen0Size { get; init; }
