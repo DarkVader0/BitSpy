@@ -42,8 +42,8 @@ public class LogRepository : ILogRepository
 
     public async Task<LogDomain?> GetLogAsync(string level, DateTime timestamp, string logTemplate)
     {
-        var query = await _session.PrepareAsync("SELECT * FROM logs WHERE level = ? AND timestamp = ? AND logTemplate = ? ALLOW FILTERING");
-        var bound = query.Bind(level, timestamp, logTemplate);
+        var query = await _session.PrepareAsync("SELECT * FROM logs WHERE level = ? AND timestamp = ?");
+        var bound = query.Bind(level, timestamp);
         var result = await _session.ExecuteAsync(bound);
         var row = result.FirstOrDefault();
         if (row is null)
@@ -59,16 +59,16 @@ public class LogRepository : ILogRepository
 
     public async Task<bool> UpdateAsync(LogDomain log)
     {
-        var query = await _session.PrepareAsync("UPDATE logs SET logTemplate = ?, logValues = ?, timestamp = ? WHERE level = ?");
-        var bound = query.Bind(log.LogTemplate, log.LogValues, log.Timestamp, log.Level);
+        var query = await _session.PrepareAsync("UPDATE bitspy.logs SET logValues = ?, logTemplate = ? WHERE level = ? AND timestamp = ?");
+        var bound = query.Bind(log.LogValues ,log.LogTemplate,log.Level,log.Timestamp);
         var result = await _session.ExecuteAsync(bound);
         return result.IsFullyFetched;
     }
 
     public async Task<bool> DeleteAsync(string level, DateTime timestamp, string logTemplate)
     {
-        var query = await _session.PrepareAsync("DELETE FROM logs WHERE level = ? AND timestamp = ? AND logTemplate = ?");
-        var bound = query.Bind(level, timestamp, logTemplate);
+        var query = await _session.PrepareAsync("DELETE FROM logs WHERE level = ? AND timestamp = ?");
+        var bound = query.Bind(level, timestamp);
         var result = await _session.ExecuteAsync(bound);
         return result.IsFullyFetched;
     }

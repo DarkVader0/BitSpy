@@ -45,10 +45,6 @@ public class LogEndpoints : IEndpoint
         [FromBody] LogRequest logRequest,
         ILogService logService)
     {
-        var existingLog = await logService
-            .GetLogAsync(logRequest.Level, logRequest.Timestamp, logRequest.LogTemplate);
-        if (existingLog is null) return Results.NotFound();
-
         var updated = await logService.UpdateAsync(logRequest.ToDomain());
 
         return updated ? Results.Ok() : Results.NotFound();
