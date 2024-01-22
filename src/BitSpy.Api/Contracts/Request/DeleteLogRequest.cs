@@ -3,6 +3,5 @@
 public class DeleteLogRequest
 {
     public required string Level { get; init; }
-    public required string LogTemplate { get; init; }
     public required DateTime Timestamp { get; init; }
 }

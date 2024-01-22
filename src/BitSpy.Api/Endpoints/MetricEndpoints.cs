@@ -12,8 +12,10 @@ public class MetricEndpoints : IEndpoint
     public static void DefineEndpoints(IEndpointRouteBuilder app)
     {
         app.MapPost(BaseRoute, AddMetric);
-        app.MapGet(BaseRoute, GetMetric);
+        app.MapGet(BaseRoute + "/{name}", GetMetric);
         app.MapGet(BaseRoute + "/all", GetAll);
+        app.MapPut(BaseRoute, UpdateMetric);
+        app.MapDelete(BaseRoute, DeleteMetric);
     }
 
     private static async Task<IResult> AddMetric(
@@ -26,7 +28,7 @@ public class MetricEndpoints : IEndpoint
     }
 
     private static async Task<IResult> GetMetric(
-        string name,
+        [FromRoute]string name,
         decimal cpuUsage,
         DateTime timeStamp,
         IMetricService metricService)
@@ -46,5 +48,24 @@ public class MetricEndpoints : IEndpoint
         var result =
             await metricService.GetMetricsAsync(startingTimeStamp, endingTimeStamp);
         return Results.Ok(result);
+    }
+    
+    private static async Task<IResult> UpdateMetric(
+        [FromBody] MetricRequest metricRequest,
+        IMetricService metricService)
+    {
+        var updated = await metricService.UpdateAsync(metricRequest.ToDomain());
+
+        return updated ? Results.Ok() : Results.NotFound();
+    }
+    
+    private static async Task<IResult> DeleteMetric(string name,
+        decimal cpuUsage,
+        DateTime timeStamp,
+        IMetricService metricService)
+    {
+        var deleted = await metricService.DeleteAsync(name, cpuUsage, timeStamp);
+
+        return deleted ? Results.Ok() : Results.NotFound();
     }
 }

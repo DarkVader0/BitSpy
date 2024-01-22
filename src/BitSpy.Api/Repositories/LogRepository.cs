@@ -40,7 +40,7 @@ public class LogRepository : ILogRepository
         });
     }
 
-    public async Task<LogDomain?> GetLogAsync(string level, DateTime timestamp, string logTemplate)
+    public async Task<LogDomain?> GetLogAsync(string level, DateTime timestamp)
     {
         var query = await _session.PrepareAsync("SELECT * FROM logs WHERE level = ? AND timestamp = ?");
         var bound = query.Bind(level, timestamp);
@@ -65,7 +65,7 @@ public class LogRepository : ILogRepository
         return result.IsFullyFetched;
     }
 
-    public async Task<bool> DeleteAsync(string level, DateTime timestamp, string logTemplate)
+    public async Task<bool> DeleteAsync(string level, DateTime timestamp)
     {
         var query = await _session.PrepareAsync("DELETE FROM logs WHERE level = ? AND timestamp = ?");
         var bound = query.Bind(level, timestamp);

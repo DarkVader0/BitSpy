@@ -32,11 +32,7 @@ public class LogEndpoints : IEndpoint
         [FromBody] DeleteLogRequest logRequest,
         ILogService logService)
     {
-        var existingLog = await logService
-            .GetLogAsync(logRequest.Level, logRequest.Timestamp, logRequest.LogTemplate);
-        if (existingLog is null) return Results.NotFound();
-
-        var deleted = await logService.DeleteAsync(logRequest.Level, logRequest.Timestamp, logRequest.LogTemplate);
+        var deleted = await logService.DeleteAsync(logRequest.Level, logRequest.Timestamp);
 
         return deleted ? Results.Ok() : Results.NotFound();
     }
@@ -63,11 +59,10 @@ public class LogEndpoints : IEndpoint
     private static async Task<IResult> GetLog(
         string level,
         DateTime startingTimeStamp,
-        string logTemplate,
         ILogService logService)
     {
         var result = 
-            await logService.GetLogAsync(level, startingTimeStamp, logTemplate);
+            await logService.GetLogAsync(level, startingTimeStamp);
 
         return result is null ? Results.NotFound() : Results.Ok(result);
     }
