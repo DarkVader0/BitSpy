@@ -39,9 +39,9 @@ public class MetricRepository : IMetricRepository
         return result.Select(row => new MetricDomain
         {
             Name = row.GetValue<string>("name"),
-            TimeInGCSinceLastGCPercentage = row.GetValue<decimal>("timeInGCSinceLastGCPercentage".ToLower()),
+            TimeInGCSinceLastGCPercentage = row.GetValue<double>("timeInGCSinceLastGCPercentage".ToLower()),
             AllocationRatePerSecond = row.GetValue<int>("allocationRatePerSecond".ToLower()),
-            CPUUsage = row.GetValue<decimal>("cpuUsage".ToLower()),
+            CPUUsage = row.GetValue<double>("cpuUsage".ToLower()),
             ExceptionCount = row.GetValue<int>("exceptionCount".ToLower()),
             Gen0CollectionCount = row.GetValue<int>("gen0CollectionCount".ToLower()),
             Gen0Size = row.GetValue<int>("gen0Size".ToLower()),
@@ -58,7 +58,7 @@ public class MetricRepository : IMetricRepository
     }
 
     public async Task<MetricDomain?> GetMetricAsync(string name,
-        decimal cpuUsage,
+        double cpuUsage,
         DateTime timestamp)
     {
         var query = await _session.PrepareAsync(
@@ -71,9 +71,9 @@ public class MetricRepository : IMetricRepository
         return new MetricDomain
         {
             Name = row.GetValue<string>("name"),
-            TimeInGCSinceLastGCPercentage = row.GetValue<decimal>("timeInGCSinceLastGCPercentage".ToLower()),
+            TimeInGCSinceLastGCPercentage = row.GetValue<double>("timeInGCSinceLastGCPercentage".ToLower()),
             AllocationRatePerSecond = row.GetValue<int>("allocationRatePerSecond".ToLower()),
-            CPUUsage = row.GetValue<decimal>("cpuUsage".ToLower()),
+            CPUUsage = row.GetValue<double>("cpuUsage".ToLower()),
             ExceptionCount = row.GetValue<int>("exceptionCount".ToLower()),
             Gen0CollectionCount = row.GetValue<int>("gen0CollectionCount".ToLower()),
             Gen0Size = row.GetValue<int>("gen0Size".ToLower()),
@@ -103,7 +103,7 @@ public class MetricRepository : IMetricRepository
     }
 
     public async Task<bool> DeleteAsync(string name,
-        decimal cpuUsage,
+        double cpuUsage,
         DateTime timestamp)
     {
         var query = await _session.PrepareAsync(
