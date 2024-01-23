@@ -2,9 +2,9 @@
 @using BitSpy.Ui.Response
 @inject HttpClient client
 
-<PageTitle>logs</PageTitle>
+<PageTitle>metrics</PageTitle>
 
-<h1>Logs</h1>
+<h1>Metrics</h1>
 
 @foreach (var metric in metrics)
 {
@@ -24,7 +24,7 @@
     {
         var startingDate = DateTime.Now.AddYears(-1);
         var endingDate = DateTime.Now.AddYears(1);
-        var response = await client.GetAsync($"{ApiConstants.ApiUrl}/metrics?startingTimeStamp={startingDate}&endingTimeStamp={endingDate}");
+        var response = await client.GetAsync($"{ApiConstants.ApiUrl}/metrics/all?startingTimeStamp={startingDate}&endingTimeStamp={endingDate}");
         metrics = await response.Content.ReadFromJsonAsync<List<MetricResponse>>() ?? new List<MetricResponse>();
     }
 }
