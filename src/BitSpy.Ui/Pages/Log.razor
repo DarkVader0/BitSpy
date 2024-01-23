@@ -1,0 +1,30 @@
+﻿@page "/logs"
+@using BitSpy.Ui.Response
+@inject HttpClient client
+
+<PageTitle>logs</PageTitle>
+
+<h1>Logs</h1>
+
+@foreach (var log in logs)
+{
+    <p>
+        @log.Level - @log.Timestamp - @log.LogTemplate
+        @foreach (var value in log.LogValues)
+        {
+            @value
+        }
+    </p>
+}
+
+@code {
+    private List<LogResponse> logs = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var startingDate = DateTime.Now.AddYears(-1);
+        var endingDate = DateTime.Now.AddYears(1);
+        var response = await client.GetAsync($"http://localhost:7185/logs?startingTimeStamp={startingDate}&endingTimeStamp={endingDate}");
+        logs = await response.Content.ReadFromJsonAsync<List<LogResponse>>() ?? new List<LogResponse>();
+    }
+}

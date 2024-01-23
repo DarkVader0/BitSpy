@@ -1,0 +1,30 @@
+﻿@page "/metrics"
+@using BitSpy.Ui.Response
+@inject HttpClient client
+
+<PageTitle>logs</PageTitle>
+
+<h1>Logs</h1>
+
+@foreach (var metric in metrics)
+{
+    <p>
+        @metric.Name - @metric.Timestamp - @metric.TimeInGCSinceLastGCPercentage 
+        - @metric.AllocationRatePerSecond - 
+        @metric.CPUUsage - @metric.ExceptionCount
+        @metric.Gen0Size - @metric.Gen1Size - @metric.Gen2Size
+        @metric.Gen0CollectionCount - @metric.Gen1CollectionCount - @metric.Gen2CollectionCount
+    </p>
+}
+
+@code {
+    private List<MetricResponse> metrics = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var startingDate = DateTime.Now.AddYears(-1);
+        var endingDate = DateTime.Now.AddYears(1);
+        var response = await client.GetAsync($"http://localhost:7185/metrics?startingTimeStamp={startingDate}&endingTimeStamp={endingDate}");
+        metrics = await response.Content.ReadFromJsonAsync<List<MetricResponse>>() ?? new List<MetricResponse>();
+    }
+}
