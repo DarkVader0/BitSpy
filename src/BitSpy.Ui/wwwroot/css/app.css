@@ -101,3 +101,23 @@ a, .btn-link {
 code {
     color: #c02d76;
 }
+
+.chart {
+    width: 100%;
+    height: auto;
+}
+
+.bar {
+    background-color: #4CAF50;
+    width: 0;
+    height: 20px;
+    margin: 5px 0;
+    color: white;
+    text-align: right;
+    line-height: 20px;
+    transition: width 0.5s;
+}
+
+.bar span {
+    padding-right: 10px;
+}

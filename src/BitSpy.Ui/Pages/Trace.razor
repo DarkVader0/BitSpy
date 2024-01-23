@@ -7,7 +7,34 @@
 <h1>Traces</h1>
 @foreach (var trace in traces)
 {
-    
+    <h2>@trace.Name</h2>
+
+    @foreach (var traceAttribute in trace.Attributes)
+    {
+        <p>@traceAttribute.Name: @traceAttribute.Value</p>
+    }
+
+    <div class="chart">
+        @{
+            var maxDuration = (trace.EndTime - trace.StartTime).Milliseconds;
+            var duration = (trace.Events[0].Timestamp - trace.StartTime).Milliseconds;
+        }
+
+        <div class="bar" style="width: @(duration / maxDuration * 100)%">
+            <span>@trace.Name: @duration ms</span>
+        </div>
+        @for (var i = 0; i < trace.Events.Count - 1; i++)
+        {
+            duration = (trace.Events[i + 1].Timestamp - trace.Events[i].Timestamp).Milliseconds;
+            <div class="bar" style="width: @(duration / maxDuration * 100)%">
+                <span>@trace.Events[i].Name: @duration ms</span>
+            </div>
+        }
+        duration = (trace.EndTime - trace.Events[^1].Timestamp).Milliseconds;
+        <div class="bar" style="width: @(duration / maxDuration * 100)%">
+            <span>@trace.Events[^1].Name: @duration ms</span>
+        </div>
+    </div>
 }
 
 @code {
@@ -15,9 +42,8 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var startingDate = DateTime.Now.AddYears(-1);
-        var endingDate = DateTime.Now.AddYears(1);
-        var response = await client.GetAsync($"http://localhost:7185/traces?startingTimeStamp={startingDate}&endingTimeStamp={endingDate}");
+        var response = await client.GetAsync("http://localhost:7185/traces/string");
         traces = await response.Content.ReadFromJsonAsync<List<TraceResponse>>() ?? new List<TraceResponse>();
     }
+
 }
