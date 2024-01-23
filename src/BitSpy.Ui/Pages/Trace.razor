@@ -1,0 +1,23 @@
+﻿@page "/traces"
+@using BitSpy.Ui.Response
+@inject HttpClient client
+
+<PageTitle>Traces</PageTitle>
+
+<h1>Traces</h1>
+@foreach (var trace in traces)
+{
+    
+}
+
+@code {
+    private List<TraceResponse> traces = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var startingDate = DateTime.Now.AddYears(-1);
+        var endingDate = DateTime.Now.AddYears(1);
+        var response = await client.GetAsync($"http://localhost:7185/traces?startingTimeStamp={startingDate}&endingTimeStamp={endingDate}");
+        traces = await response.Content.ReadFromJsonAsync<List<TraceResponse>>() ?? new List<TraceResponse>();
+    }
+}
