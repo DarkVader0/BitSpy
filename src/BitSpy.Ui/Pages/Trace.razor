@@ -16,24 +16,29 @@
 
     <div class="chart">
         @{
-            var maxDuration = (trace.EndTime - trace.StartTime).Milliseconds;
-            var duration = (trace.Events[0].Timestamp - trace.StartTime).Milliseconds;
+            var maxDuration = (trace.EndTime - trace.StartTime).TotalMilliseconds;
+            var duration = (trace.Events[0].Timestamp - trace.StartTime).TotalMilliseconds;
         }
 
         <div class="bar" style="width: @(duration / maxDuration * 100)%">
             <span>@trace.Name: @duration ms</span>
         </div>
-        @for (var i = 0; i < trace.Events.Count - 1; i++)
-        {
-            duration = (trace.Events[i + 1].Timestamp - trace.Events[i].Timestamp).Milliseconds;
-            <div class="bar" style="width: @(duration / maxDuration * 100)%">
-                <span>@trace.Events[i].Name: @duration ms</span>
+        @{
+            var cumulativeDuration = 0.0;
+            for (var i = 0; i < trace.Events.Count - 1; i++)
+            {
+                duration = (trace.Events[i + 1].Timestamp - trace.Events[i].Timestamp).TotalMilliseconds;
+                cumulativeDuration += duration;
+                <div class="bar" style="width: @(duration / maxDuration * 100)%; margin-left: @(cumulativeDuration / maxDuration * 100)%">
+                    <span>@trace.Events[i].Name: @duration ms</span>
+                </div>
+            }
+            var lastDuration = (trace.EndTime - trace.Events[^1].Timestamp).TotalMilliseconds;
+            cumulativeDuration += lastDuration;
+            <div class="bar" style="width: @(lastDuration / maxDuration * 100)%; margin-left: @(cumulativeDuration / maxDuration * 100)%">
+                <span>@trace.Events[^1].Name: @lastDuration ms</span>
             </div>
         }
-        duration = (trace.EndTime - trace.Events[^1].Timestamp).Milliseconds;
-        <div class="bar" style="width: @(duration / maxDuration * 100)%">
-            <span>@trace.Events[^1].Name: @duration ms</span>
-        </div>
     </div>
 }
 
