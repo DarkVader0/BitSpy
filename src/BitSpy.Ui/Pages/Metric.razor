@@ -8,7 +8,7 @@
 
 @foreach (var metric in metrics)
 {
-    <p>
+    <p class="border-1">
         @metric.Name - @metric.Timestamp - @metric.TimeInGCSinceLastGCPercentage 
         - @metric.AllocationRatePerSecond - 
         @metric.CPUUsage - @metric.ExceptionCount

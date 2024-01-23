@@ -8,7 +8,7 @@
 
 @foreach (var log in logs)
 {
-    <p>
+    <p class="border-1">
         @log.Level - @log.Timestamp - @log.LogTemplate
         @foreach (var value in log.LogValues)
         {

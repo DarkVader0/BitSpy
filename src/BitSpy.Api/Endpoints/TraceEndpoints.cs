@@ -30,7 +30,7 @@ public class TraceEndpoints : IEndpoint
         ITraceService traceService)
     {
         var result = await traceService.GetTraceAsync(name);
-        return result is null ? Results.NotFound() : Results.Ok(result);
+        return result is null ? Results.NotFound() : Results.Ok(result.ToContract());
     }
 
     private static async Task<IResult> GetAllTraces(
@@ -38,7 +38,7 @@ public class TraceEndpoints : IEndpoint
         ITraceService traceService)
     {
         var result = await traceService.GetTracesAsync(name);
-        return Results.Ok(result);
+        return Results.Ok(result.Select(x => x.ToContract()));
     }
 
     private static async Task<IResult> UpdateTrace(
