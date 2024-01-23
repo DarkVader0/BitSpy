@@ -42,7 +42,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var response = await client.GetAsync("http://localhost:7185/traces/string");
+        var response = await client.GetAsync($"{ApiConstants.ApiUrl}/traces/string");
         traces = await response.Content.ReadFromJsonAsync<List<TraceResponse>>() ?? new List<TraceResponse>();
     }
 

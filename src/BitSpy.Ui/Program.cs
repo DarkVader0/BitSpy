@@ -8,4 +8,9 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
+if (builder.HostEnvironment.IsDevelopment())
+{
+    ApiConstants.ApiUrl = ApiConstants.LocalApi;
+}
+
 await builder.Build().RunAsync();

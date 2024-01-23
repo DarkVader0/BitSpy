@@ -24,7 +24,7 @@
     {
         var startingDate = DateTime.Now.AddYears(-1);
         var endingDate = DateTime.Now.AddYears(1);
-        var response = await client.GetAsync($"http://localhost:7185/logs?startingTimeStamp={startingDate}&endingTimeStamp={endingDate}");
+        var response = await client.GetAsync($"{ApiConstants.ApiUrl}/logs?startingTimeStamp={startingDate}&endingTimeStamp={endingDate}");
         logs = await response.Content.ReadFromJsonAsync<List<LogResponse>>() ?? new List<LogResponse>();
     }
 }
