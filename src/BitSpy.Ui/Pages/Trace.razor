@@ -50,7 +50,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var response = await client.GetAsync($"{ApiConstants.ApiUrl}/traces?name=string");
+        var response = await client.GetAsync($"{ApiConstants.ApiUrl}/traces?name=string2");
         traces = await response.Content.ReadFromJsonAsync<List<TraceResponse>>() ?? new List<TraceResponse>();
     }
 
