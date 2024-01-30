@@ -1,6 +1,8 @@
-﻿namespace BitSpy.Api.Models;
+﻿using BitSpy.Api.Models;
 
-public sealed class EventDomain
+namespace BitSpy.Api.Contracts.Database;
+
+public sealed class EventContract
 {
     public required string Name { get; init; }
     public required string Message { get; init; }

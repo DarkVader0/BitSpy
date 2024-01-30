@@ -50,50 +50,50 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // traces.Add(new TraceResponse
-        // {
-        //     Name = "test",
-        //     StartTime = DateTime.Now,
-        //     EndTime = DateTime.Now.AddMilliseconds(200),
-        //     Attributes = new List<AttributeResponse>()
-        //     {
-        //         new AttributeResponse()
-        //         {
-        //             Name = "Tessst",
-        //             Value = "Test"
-        //         },
-        //         new AttributeResponse()
-        //         {
-        //             Name = "Tessst",
-        //             Value = "Test"
-        //         }
-        //     },
-        //     Events = new List<EventResponse>()
-        //     {
-        //         new EventResponse
-        //         {
-        //             Name = "Method1",
-        //             Message = "eeee",
-        //             Timestamp = DateTime.Now.AddMilliseconds(50),
-        //             Attributes = null
-        //         },
-        //         new EventResponse
-        //         {
-        //             Name = "Method2",
-        //             Message = "eeee",
-        //             Timestamp = DateTime.Now.AddMilliseconds(100),
-        //             Attributes = null
-        //         },
-        //         new EventResponse
-        //         {
-        //             Name = "Method3",
-        //             Message = "eeee",
-        //             Timestamp = DateTime.Now.AddMilliseconds(150),
-        //             Attributes = null
-        //         }
-        //     }
-        // });
-        // return;
+        traces.Add(new TraceResponse
+        {
+            Name = "test",
+            StartTime = DateTime.Now,
+            EndTime = DateTime.Now.AddMilliseconds(200),
+            Attributes = new List<AttributeResponse>()
+            {
+                new AttributeResponse()
+                {
+                    Name = "Tessst",
+                    Value = "Test"
+                },
+                new AttributeResponse()
+                {
+                    Name = "Tessst",
+                    Value = "Test"
+                }
+            },
+            Events = new List<EventResponse>()
+            {
+                new EventResponse
+                {
+                    Name = "Method1",
+                    Message = "eeee",
+                    Timestamp = DateTime.Now.AddMilliseconds(50),
+                    Attributes = null
+                },
+                new EventResponse
+                {
+                    Name = "Method2",
+                    Message = "eeee",
+                    Timestamp = DateTime.Now.AddMilliseconds(100),
+                    Attributes = null
+                },
+                new EventResponse
+                {
+                    Name = "Method3",
+                    Message = "eeee",
+                    Timestamp = DateTime.Now.AddMilliseconds(150),
+                    Attributes = null
+                }
+            }
+        });
+        return;
         var response = await client.GetAsync($"{ApiConstants.ApiUrl}/traces?name=string2");
         traces = await response.Content.ReadFromJsonAsync<List<TraceResponse>>() ?? new List<TraceResponse>();
     }

@@ -41,6 +41,7 @@ public static class ContractToDomainMapper
             Name = request.Name,
             StartTime = request.StartTime,
             EndTime = request.EndTime,
+            IpEvent = new (),
             Attributes = request.Attributes.Select(x => x.ToDomain()).ToList(),
             Events = request.Events.Select(x => x.ToDomain()).ToList()
         };
