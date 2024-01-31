@@ -2,6 +2,6 @@
 
 public sealed class GetAllLogsRequest
 {
-    public DateTime StartingTimeStamp  { get; init; }
-    public DateTime EndingTimeStamp  { get; init; }
+    public DateTime StartingTimeStamp { get; init; }
+    public DateTime EndingTimeStamp { get; init; }
 }

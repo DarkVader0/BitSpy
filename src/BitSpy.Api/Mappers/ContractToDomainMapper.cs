@@ -1,5 +1,4 @@
-﻿using BitSpy.Api.Contracts.Database.Relationships;
-using BitSpy.Api.Contracts.Request;
+﻿using BitSpy.Api.Contracts.Request;
 using BitSpy.Api.Models;
 
 namespace BitSpy.Api.Mappers;
@@ -7,16 +6,19 @@ namespace BitSpy.Api.Mappers;
 public static class ContractToDomainMapper
 {
     public static LogDomain ToDomain(this LogRequest request)
-        => new()
+    {
+        return new LogDomain
         {
             Level = request.Level,
             Timestamp = request.Timestamp,
             LogTemplate = request.LogTemplate,
             LogValues = request.LogValues
         };
-    
+    }
+
     public static MetricDomain ToDomain(this MetricRequest request)
-        => new()
+    {
+        return new MetricDomain
         {
             Name = request.Name,
             TimeInGCSinceLastGCPercentage = request.TimeInGCSinceLastGCPercentage,
@@ -35,9 +37,11 @@ public static class ContractToDomainMapper
             WorkingSet = request.WorkingSet,
             Timestamp = request.Timestamp
         };
+    }
 
     public static TraceDomain ToDomain(this TraceRequest request)
-        => new()
+    {
+        return new TraceDomain
         {
             Name = request.Name,
             Duration = (long)(request.EndTime - request.StartTime).TotalMilliseconds,
@@ -47,24 +51,31 @@ public static class ContractToDomainMapper
                 .ToList(),
             IpAddress = request.IpAddress
         };
+    }
 
     public static AttributeDomain ToDomain(this AttributeRequest request)
-        => new()
+    {
+        return new AttributeDomain
         {
             Name = request.Name,
             Value = request.Value
         };
-    
+    }
+
     public static TraceEventRelationshipDomain ToDomain(this EventRequest request)
-        => new()
+    {
+        return new TraceEventRelationshipDomain
         {
             EventCounter = 0,
             EventAvgDuration = 0,
-            Event = new(){
-            Name = request.Name,
-            Message = request.Message,
-            Attributes = request.Attributes.Select(x => x.ToDomain())
-                .ToList(),
-            Duration = request.Timestamp.Millisecond
-        }};
+            Event = new EventDomain
+            {
+                Name = request.Name,
+                Message = request.Message,
+                Attributes = request.Attributes.Select(x => x.ToDomain())
+                    .ToList(),
+                Duration = request.Timestamp.Millisecond
+            }
+        };
+    }
 }

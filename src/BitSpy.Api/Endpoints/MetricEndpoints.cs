@@ -9,6 +9,7 @@ namespace BitSpy.Api.Endpoints;
 public class MetricEndpoints : IEndpoint
 {
     private const string BaseRoute = "/metrics";
+
     public static void DefineEndpoints(IEndpointRouteBuilder app)
     {
         app.MapPost(BaseRoute, AddMetric);
@@ -19,7 +20,7 @@ public class MetricEndpoints : IEndpoint
     }
 
     private static async Task<IResult> AddMetric(
-        [FromBody]MetricRequest metricRequest,
+        [FromBody] MetricRequest metricRequest,
         IMetricService metricService)
     {
         var added = await metricService.SaveAsync(metricRequest.ToDomain());
@@ -28,16 +29,14 @@ public class MetricEndpoints : IEndpoint
     }
 
     private static async Task<IResult> GetMetric(
-        [FromRoute]string name,
+        [FromRoute] string name,
         double cpuUsage,
         DateTime timeStamp,
         IMetricService metricService)
     {
         var metric = await metricService.GetMetricAsync(name, cpuUsage, timeStamp);
 
-        return metric is null ?
-            Results.NotFound() :
-            Results.Ok(metric);
+        return metric is null ? Results.NotFound() : Results.Ok(metric);
     }
 
     private static async Task<IResult> GetAll(
@@ -49,7 +48,7 @@ public class MetricEndpoints : IEndpoint
             await metricService.GetMetricsAsync(startingTimeStamp, endingTimeStamp);
         return Results.Ok(result);
     }
-    
+
     private static async Task<IResult> UpdateMetric(
         [FromBody] MetricRequest metricRequest,
         IMetricService metricService)
@@ -58,7 +57,7 @@ public class MetricEndpoints : IEndpoint
 
         return updated ? Results.Ok() : Results.NotFound();
     }
-    
+
     private static async Task<IResult> DeleteMetric(string name,
         double cpuUsage,
         DateTime timeStamp,

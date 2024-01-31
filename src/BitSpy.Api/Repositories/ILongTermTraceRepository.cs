@@ -1,5 +1,4 @@
-﻿using BitSpy.Api.Contracts.Database;
-using BitSpy.Api.Models;
+﻿using BitSpy.Api.Models;
 
 namespace BitSpy.Api.Repositories;
 

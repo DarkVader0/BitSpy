@@ -33,7 +33,8 @@ public class MetricRepository : IMetricRepository
 
     public async Task<IEnumerable<MetricDomain>> GetMetricsAsync(DateTime startingTimestamp, DateTime endingTimestamp)
     {
-        var query = await _session.PrepareAsync("SELECT * FROM metrics WHERE timestamp >= ? AND timestamp <= ? ALLOW FILTERING");
+        var query = await _session.PrepareAsync(
+            "SELECT * FROM metrics WHERE timestamp >= ? AND timestamp <= ? ALLOW FILTERING");
         var bound = query.Bind(startingTimestamp, endingTimestamp);
         var result = await _session.ExecuteAsync(bound);
         return result.Select(row => new MetricDomain
@@ -67,7 +68,10 @@ public class MetricRepository : IMetricRepository
         var result = await _session.ExecuteAsync(bound);
         var row = result.FirstOrDefault();
         if (row is null)
+        {
             return null;
+        }
+
         return new MetricDomain
         {
             Name = row.GetValue<string>("name"),

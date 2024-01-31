@@ -9,7 +9,7 @@ namespace BitSpy.Api.Endpoints;
 public class LogEndpoints : IEndpoint
 {
     private const string BaseRoute = "/logs";
-    
+
     public static void DefineEndpoints(IEndpointRouteBuilder app)
     {
         app.MapPost(BaseRoute, CreateLog);
@@ -20,7 +20,7 @@ public class LogEndpoints : IEndpoint
     }
 
     private static async Task<IResult> CreateLog(
-        [FromBody]LogRequest logRequest,
+        [FromBody] LogRequest logRequest,
         ILogService logService
     )
     {
@@ -51,7 +51,7 @@ public class LogEndpoints : IEndpoint
         DateTime endingTimeStamp,
         ILogService logService)
     {
-        var logList = 
+        var logList =
             await logService.GetLogsAsync(startingTimeStamp, endingTimeStamp);
         return Results.Ok(logList);
     }
@@ -61,7 +61,7 @@ public class LogEndpoints : IEndpoint
         DateTime startingTimeStamp,
         ILogService logService)
     {
-        var result = 
+        var result =
             await logService.GetLogAsync(level, startingTimeStamp);
 
         return result is null ? Results.NotFound() : Results.Ok(result);

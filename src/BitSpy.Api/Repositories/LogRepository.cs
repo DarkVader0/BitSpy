@@ -20,7 +20,8 @@ public class LogRepository : ILogRepository
 
     public async Task<bool> SaveAsync(LogDomain log)
     {
-        var query = await _session.PrepareAsync("INSERT INTO logs (level, logTemplate, logValues, timestamp) VALUES (?, ?, ?, ?)");
+        var query = await _session.PrepareAsync(
+            "INSERT INTO logs (level, logTemplate, logValues, timestamp) VALUES (?, ?, ?, ?)");
         var bound = query.Bind(log.Level, log.LogTemplate, log.LogValues, log.Timestamp);
         var result = await _session.ExecuteAsync(bound);
         return result.IsFullyFetched;
@@ -28,7 +29,8 @@ public class LogRepository : ILogRepository
 
     public async Task<IEnumerable<LogDomain>> GetLogsAsync(DateTime startingTimestamp, DateTime endingTimestamp)
     {
-        var query = await _session.PrepareAsync("SELECT * FROM logs WHERE timestamp >= ? AND timestamp <= ? ALLOW FILTERING");
+        var query = await _session.PrepareAsync(
+            "SELECT * FROM logs WHERE timestamp >= ? AND timestamp <= ? ALLOW FILTERING");
         var bound = query.Bind(startingTimestamp, endingTimestamp);
         var result = await _session.ExecuteAsync(bound);
         return result.Select(row => new LogDomain
@@ -47,7 +49,10 @@ public class LogRepository : ILogRepository
         var result = await _session.ExecuteAsync(bound);
         var row = result.FirstOrDefault();
         if (row is null)
+        {
             return null;
+        }
+
         return new LogDomain
         {
             Level = row.GetValue<string>("level"),
@@ -59,8 +64,9 @@ public class LogRepository : ILogRepository
 
     public async Task<bool> UpdateAsync(LogDomain log)
     {
-        var query = await _session.PrepareAsync("UPDATE bitspy.logs SET logValues = ?, logTemplate = ? WHERE level = ? AND timestamp = ?");
-        var bound = query.Bind(log.LogValues ,log.LogTemplate,log.Level,log.Timestamp);
+        var query = await _session.PrepareAsync(
+            "UPDATE bitspy.logs SET logValues = ?, logTemplate = ? WHERE level = ? AND timestamp = ?");
+        var bound = query.Bind(log.LogValues, log.LogTemplate, log.Level, log.Timestamp);
         var result = await _session.ExecuteAsync(bound);
         return result.IsFullyFetched;
     }

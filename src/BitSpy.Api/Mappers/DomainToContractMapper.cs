@@ -6,16 +6,19 @@ namespace BitSpy.Api.Mappers;
 public static class DomainToContractMapper
 {
     public static LogResponse ToContract(this LogDomain domain)
-        => new LogResponse
+    {
+        return new LogResponse()
         {
             Level = domain.Level,
             LogTemplate = domain.LogTemplate,
             LogValues = domain.LogValues,
             Timestamp = domain.Timestamp
         };
+    }
 
     public static MetricResponse ToContract(this MetricDomain domain)
-        => new MetricResponse
+    {
+        return new MetricResponse()
         {
             Name = domain.Name,
             TimeInGCSinceLastGCPercentage = domain.TimeInGCSinceLastGCPercentage,
@@ -34,29 +37,35 @@ public static class DomainToContractMapper
             WorkingSet = domain.WorkingSet,
             Timestamp = domain.Timestamp
         };
+    }
 
     public static TraceResponse ToContract(this TraceDomain domain)
-        => new()
+    {
+        return new TraceResponse
         {
             Name = domain.Name,
             Duration = domain.Duration,
             Attributes = domain.Attributes.Select(x => x.ToContract()).ToList(),
             Events = domain.Events.Select(x => x.ToContract()).ToList()
         };
+    }
 
     public static AttributeResponse ToContract(this AttributeDomain domain)
-        => new()
+    {
+        return new AttributeResponse
         {
             Name = domain.Name,
             Value = domain.Value
         };
+    }
 
     public static TraceEventRelationshipResponse ToContract(this TraceEventRelationshipDomain domain)
-        => new()
+    {
+        return new TraceEventRelationshipResponse
         {
             EventCounter = domain.EventCounter,
             EventAvgDuration = domain.EventAvgDuration,
-            Event = new()
+            Event = new EventResponse
             {
                 Name = domain.Event.Name,
                 Message = domain.Event.Message,
@@ -65,13 +74,16 @@ public static class DomainToContractMapper
                 Duration = domain.Event.Duration
             }
         };
+    }
 
     public static EventResponse ToContract(this EventDomain domain)
-        => new()
+    {
+        return new EventResponse
         {
             Name = domain.Name,
             Message = domain.Message,
             Attributes = domain.Attributes.Select(x => x.ToContract()).ToList(),
             Duration = domain.Duration
         };
+    }
 }

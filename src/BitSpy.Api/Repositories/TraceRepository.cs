@@ -41,7 +41,7 @@ public class TraceRepository : ITraceRepository
         var ipUserContract = ipUserContractNode is not null
             ? new IpUserContract
             {
-                IpAddress = ipUserContractNode.Properties["IpAddress"].As<string>(),
+                IpAddress = ipUserContractNode.Properties["IpAddress"].As<string>()
             }
             : null;
 
@@ -118,7 +118,7 @@ public class TraceRepository : ITraceRepository
             "CREATE (ip:IpUserContract {IpAddress: $ipAddress}) RETURN ip",
             new Dictionary<string, object>
             {
-                { "ipAddress", ip.IpAddress },
+                { "ipAddress", ip.IpAddress }
             });
 
         var record = await result.SingleAsync();
@@ -126,7 +126,7 @@ public class TraceRepository : ITraceRepository
         var ipUserContractNode = record["ip"].As<INode>();
         var createdIpUserContract = new IpUserContract
         {
-            IpAddress = ipUserContractNode.Properties["IpAddress"].As<string>(),
+            IpAddress = ipUserContractNode.Properties["IpAddress"].As<string>()
         };
 
         return createdIpUserContract;
@@ -325,17 +325,17 @@ public class TraceRepository : ITraceRepository
                     JsonSerializer.Deserialize<List<AttributeDomain>>(eventNode.Properties["Attributes"].As<string>())!
             };
 
-            var eventDomain = new TraceEventRelationshipDomain()
+            var eventDomain = new TraceEventRelationshipDomain
             {
                 EventCounter = relationship.EventCounter,
                 EventAvgDuration = relationship.EventAvgDuration,
-                Event = new()
+                Event = new EventDomain
                 {
                     Name = eventContract.Name,
                     Message = eventContract.Message,
                     Duration = eventContract.Duration,
                     Attributes = eventContract.Attributes
-                        .Select(a => new AttributeDomain { Name = a.Name, Value = a.Value }).ToList(),
+                        .Select(a => new AttributeDomain { Name = a.Name, Value = a.Value }).ToList()
                 }
             };
 

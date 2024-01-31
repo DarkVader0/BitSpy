@@ -1,15 +1,15 @@
-﻿using BitSpy.Api.Models;
-using BitSpy.Api.Repositories;
-using BitSpy.Api.Contracts.Database;
+﻿using BitSpy.Api.Contracts.Database;
 using BitSpy.Api.Contracts.Response;
 using BitSpy.Api.Mappers;
+using BitSpy.Api.Models;
+using BitSpy.Api.Repositories;
 
 namespace BitSpy.Api.Services;
 
 public sealed class TraceService : ITraceService
 {
-    private readonly ITraceRepository _traceRepository;
     private readonly ILongTermTraceRepository _longTermTraceRepository;
+    private readonly ITraceRepository _traceRepository;
 
     public TraceService(ITraceRepository traceRepository,
         ILongTermTraceRepository longTermTraceRepository)
@@ -66,7 +66,7 @@ public sealed class TraceService : ITraceService
         }
 
         var existingEvents = (await _traceRepository
-            .GetEventsAsync(trace.Events.Select(x => x.Event.Name), existingTrace.Name))
+                .GetEventsAsync(trace.Events.Select(x => x.Event.Name), existingTrace.Name))
             .ToList();
 
         var eventsWithRelationships = existingEvents
@@ -78,9 +78,10 @@ public sealed class TraceService : ITraceService
                 (eventWithRelationship.Item2!.EventAvgDuration * eventWithRelationship.Item2!.EventCounter +
                  eventWithRelationship.Item1.Duration) / ++eventWithRelationship.Item2!.EventCounter;
 
-            await _traceRepository.UpdateRelationshipAsync(existingTrace.Name, eventWithRelationship.Item1.Name, eventWithRelationship.Item2!);
+            await _traceRepository.UpdateRelationshipAsync(existingTrace.Name, eventWithRelationship.Item1.Name,
+                eventWithRelationship.Item2!);
         }
-        
+
         var eventsWithoutRelationships = existingEvents
             .Where(x => x.Item2 is null)
             .Select(x => x.Item1);
@@ -106,64 +107,64 @@ public sealed class TraceService : ITraceService
     public async Task<bool> UpdateTraceAsync(string name, TraceDomain trace)
     {
         var existingTrace = await _traceRepository.GetTraceByNameAsync(name);
-        
+
         if (existingTrace is null)
         {
             return false;
         }
-        
+
         existingTrace.Attributes = trace.Attributes;
         existingTrace.AverageDuration = trace.Duration;
         existingTrace.Name = trace.Name;
 
         await _traceRepository.UpdateTraceAsync(existingTrace);
-        
+
         return true;
     }
 
     public async Task<bool> UpdateEventAsync(string name, TraceEventRelationshipDomain eventDomain)
     {
         var existingEvent = await _traceRepository.GetEventByNameAsync(name);
-        
+
         if (existingEvent is null)
         {
             return false;
         }
-        
+
         existingEvent.Name = eventDomain.Event.Name;
         existingEvent.Message = eventDomain.Event.Message;
         existingEvent.Attributes = eventDomain.Event.Attributes;
 
         await _traceRepository.UpdateEventAsync(existingEvent);
-        
+
         return true;
     }
 
     public async Task<bool> DeleteTraceAsync(string name)
     {
         var existingTrace = await _traceRepository.GetTraceByNameAsync(name);
-        
+
         if (existingTrace is null)
         {
             return false;
         }
-        
+
         await _traceRepository.DeleteTraceAsync(name);
-        
+
         return true;
     }
 
     public async Task<bool> DeleteEventAsync(string name)
     {
         var existingEvent = await _traceRepository.GetEventByNameAsync(name);
-        
+
         if (existingEvent is null)
         {
             return false;
         }
-        
+
         await _traceRepository.DeleteEventAsync(name);
-        
+
         return true;
     }
 
@@ -177,7 +178,7 @@ public sealed class TraceService : ITraceService
     public async Task<List<EventResponse>> GetBottleneckEventAsync(long duration, string traceName)
     {
         var result = await _traceRepository.GetBottleneckEventAsync(duration, traceName);
-        return result.Select(x => x.ToContract()).ToList();  
+        return result.Select(x => x.ToContract()).ToList();
     }
 
     public async Task<List<TraceResponse>> GetTracesForIpAsync(string ip)

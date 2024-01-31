@@ -24,14 +24,17 @@ public sealed class LogService : ILogService
 
     public async Task<LogDomain?> GetLogAsync(string level, DateTime timestamp)
     {
-        return await _logRepository.GetLogAsync(level, timestamp); 
+        return await _logRepository.GetLogAsync(level, timestamp);
     }
 
     public async Task<bool> UpdateAsync(LogDomain log)
     {
         var existingLog = await _logRepository.GetLogAsync(log.Level, log.Timestamp);
         if (existingLog is null)
+        {
             return false;
+        }
+
         return await _logRepository.UpdateAsync(log);
     }
 
@@ -39,7 +42,10 @@ public sealed class LogService : ILogService
     {
         var existingLog = await _logRepository.GetLogAsync(level, timestamp);
         if (existingLog is null)
+        {
             return false;
+        }
+
         return await _logRepository.DeleteAsync(level, timestamp);
     }
 }

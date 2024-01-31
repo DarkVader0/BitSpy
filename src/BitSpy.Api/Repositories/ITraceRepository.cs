@@ -7,7 +7,9 @@ namespace BitSpy.Api.Repositories;
 
 public interface ITraceRepository
 {
-    Task<(IpUserContract?, IpUserTraceRelationship?, TraceContract?)> GetIpAndTraceAsync(string ipAddress, string traceName);
+    Task<(IpUserContract?, IpUserTraceRelationship?, TraceContract?)> GetIpAndTraceAsync(string ipAddress,
+        string traceName);
+
     Task<TraceContract> CreateTraceAsync(TraceContract trace);
     Task<IAsyncTransaction?> BeginTransactionAsync();
     Task<IpUserContract> CreateIpAsync(IpUserContract ip);
@@ -21,8 +23,13 @@ public interface ITraceRepository
         TraceContract trace,
         string requestId);
 
-    Task UpdateRelationshipAsync(string traceName, string eventName, TraceEventRelationship relationship);
-    Task<IEnumerable<(EventContract, TraceEventRelationship?)>> GetEventsAsync(IEnumerable<string> names, string traceName);
+    Task UpdateRelationshipAsync(string traceName,
+        string eventName,
+        TraceEventRelationship relationship);
+
+    Task<IEnumerable<(EventContract, TraceEventRelationship?)>> GetEventsAsync(IEnumerable<string> names,
+        string traceName);
+
     Task AddEventWithRelationshipAsync(TraceContract trace, EventDomain eventContract);
     Task AddRelationshipAsync(EventContract traceEventRelationship, TraceContract traceContract);
     Task<List<TraceDomain>> GetBottleneckTraceAsync(long duration, int traceCounter);

@@ -10,11 +10,8 @@ public interface ITraceService
     Task<bool> UpdateEventAsync(string name, TraceEventRelationshipDomain eventDomain);
     Task<bool> DeleteTraceAsync(string name);
     Task<bool> DeleteEventAsync(string name);
-    
+
     Task<List<TraceResponse>> GetBottleneckTraceAsync(long duration, int traceCounter);
     Task<List<EventResponse>> GetBottleneckEventAsync(long duration, string traceName);
     Task<List<TraceResponse>> GetTracesForIpAsync(string ip);
-    
-    
-    
 }

@@ -41,7 +41,7 @@ public class TraceEndpoints : IEndpoint
             ? Results.Ok()
             : Results.BadRequest();
     }
-    
+
     private static async Task<IResult> DeleteEvent(string eventName,
         ITraceService traceService)
     {
@@ -50,7 +50,7 @@ public class TraceEndpoints : IEndpoint
             ? Results.Ok()
             : Results.BadRequest();
     }
-    
+
     private static async Task<IResult> DeleteTrace(string traceName,
         ITraceService traceService)
     {
