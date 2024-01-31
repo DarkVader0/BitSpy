@@ -13,6 +13,7 @@ builder.Services.AddScoped<ITraceService, TraceService>();
 builder.Services.AddScoped<ILogRepository, LogRepository>();
 builder.Services.AddScoped<IMetricRepository, MetricRepository>();
 builder.Services.AddScoped<ITraceRepository, TraceRepository>();
+builder.Services.AddScoped<ILongTermTraceRepository, LongTermTraceRepository>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

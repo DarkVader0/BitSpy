@@ -12,9 +12,17 @@ public interface ITraceRepository
     Task<IAsyncTransaction?> BeginTransactionAsync();
     Task<IpUserContract> CreateIpAsync(IpUserContract ip);
     Task UpdateAsync(TraceContract trace);
-    Task UpdateAsync(IpUserTraceRelationship ipUserTraceRelationship);
-    Task CreateIpTraceRelationshipAsync(IpUserContract ip, TraceContract trace);
-    Task UpdateRelationshipAsync(string eventName, string traceName);
-    Task<IEnumerable<EventContract>> GetEventsAsync(IEnumerable<string> names);
+
+    Task UpdateAsync(string ip,
+        string traceName,
+        IpUserTraceRelationship ipUserTraceRelationship);
+
+    Task CreateIpTraceRelationshipAsync(IpUserContract ip,
+        TraceContract trace,
+        string requestId);
+
+    Task UpdateRelationshipAsync(string traceName, string eventName, TraceEventRelationship relationship);
+    Task<IEnumerable<(EventContract, TraceEventRelationship?)>> GetEventsAsync(IEnumerable<string> names, string traceName);
     Task AddEventWithRelationshipAsync(TraceContract trace, EventDomain eventContract);
+    Task AddRelationshipAsync(EventContract traceEventRelationship, TraceContract traceContract);
 }

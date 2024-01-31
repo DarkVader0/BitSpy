@@ -41,9 +41,11 @@ public static class ContractToDomainMapper
             Name = request.Name,
             StartTime = request.StartTime,
             EndTime = request.EndTime,
-            IpEvent = new (),
-            Attributes = request.Attributes.Select(x => x.ToDomain()).ToList(),
-            Events = request.Events.Select(x => x.ToDomain()).ToList()
+            Attributes = request.Attributes.Select(x => x.ToDomain())
+                .ToList(),
+            Events = request.Events.Select(x => x.ToDomain())
+                .ToList(),
+            IpAddress = request.IpAddress
         };
 
     public static AttributeDomain ToDomain(this AttributeRequest request)
@@ -58,7 +60,8 @@ public static class ContractToDomainMapper
         {
             Name = request.Name,
             Message = request.Message,
-            Timestamp = request.Timestamp,
-            Attributes = request.Attributes.Select(x => x.ToDomain()).ToList()
+            Attributes = request.Attributes.Select(x => x.ToDomain())
+                .ToList(),
+            Duration = request.Timestamp.Millisecond
         };
 }

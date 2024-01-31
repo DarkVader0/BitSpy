@@ -1,17 +1,19 @@
-﻿using BitSpy.Api.Contracts.Database;
-using BitSpy.Api.Contracts.Database.Relationships;
-using BitSpy.Api.Models;
+﻿using BitSpy.Api.Models;
 using BitSpy.Api.Repositories;
+using BitSpy.Api.Contracts.Database;
 
 namespace BitSpy.Api.Services;
 
 public sealed class TraceService : ITraceService
 {
     private readonly ITraceRepository _traceRepository;
+    private readonly ILongTermTraceRepository _longTermTraceRepository;
 
-    public TraceService(ITraceRepository traceRepository)
+    public TraceService(ITraceRepository traceRepository,
+        ILongTermTraceRepository longTermTraceRepository)
     {
         _traceRepository = traceRepository;
+        _longTermTraceRepository = longTermTraceRepository;
     }
 
     public async Task<bool> SaveAsync(TraceDomain trace)
@@ -20,7 +22,7 @@ public sealed class TraceService : ITraceService
             await _traceRepository.GetIpAndTraceAsync(trace.IpAddress, trace.Name);
 
         var transaction = await _traceRepository.BeginTransactionAsync();
-        
+
         if (existingIp is null)
         {
             existingIp = await _traceRepository.CreateIpAsync(new IpUserContract
@@ -35,7 +37,7 @@ public sealed class TraceService : ITraceService
             {
                 Name = trace.Name,
                 Attributes = trace.Attributes,
-                AverageDuration = (trace.EndTime - trace.StartTime).Milliseconds,
+                AverageDuration = (decimal)(trace.EndTime - trace.StartTime).TotalMilliseconds,
                 TraceCounter = 1
             });
         }
@@ -43,69 +45,79 @@ public sealed class TraceService : ITraceService
         {
             existingTrace.AverageDuration =
                 (existingTrace.AverageDuration * existingTrace.TraceCounter +
-                 (trace.EndTime - trace.StartTime).Milliseconds) / ++existingTrace.TraceCounter;
-            
+                 (decimal)(trace.EndTime - trace.StartTime).TotalMilliseconds) / ++existingTrace.TraceCounter;
+
             await _traceRepository.UpdateAsync(existingTrace);
         }
 
         if (existingRelationship is null)
         {
+            var longTermTraceId = await _longTermTraceRepository.SaveAsync(trace);
             await _traceRepository
-                .CreateIpTraceRelationshipAsync(existingIp, existingTrace);
+                .CreateIpTraceRelationshipAsync(existingIp, existingTrace, longTermTraceId);
         }
         else
         {
             existingRelationship.RequestCounter++;
-            existingRelationship.RequestIds.Add(await _traceRepository.SaveToCassandraAsync(trace));
-            await _traceRepository.UpdateAsync(existingRelationship);
+            existingRelationship.RequestIds.Add(await _longTermTraceRepository.SaveAsync(trace));
+            await _traceRepository.UpdateAsync(existingIp.IpAddress, existingTrace.Name, existingRelationship);
         }
 
-        foreach(var eventToUpdate in existingTrace.Events)
+        var existingEvents = (await _traceRepository
+            .GetEventsAsync(trace.Events.Select(x => x.Name), existingTrace.Name))
+            .ToList();
+
+        var eventsWithRelationships = existingEvents
+            .Where(x => x.Item2 is not null);
+
+        foreach (var eventWithRelationship in eventsWithRelationships)
         {
-             await _traceRepository.UpdateRelationshipAsync(eventToUpdate.Name, existingTrace.Name);
+            eventWithRelationship.Item2!.EventAvgDuration =
+                (eventWithRelationship.Item2!.EventAvgDuration * eventWithRelationship.Item2!.EventCounter +
+                 eventWithRelationship.Item1.Duration) / ++eventWithRelationship.Item2!.EventCounter;
+
+            await _traceRepository.UpdateRelationshipAsync(existingTrace.Name, eventWithRelationship.Item1.Name, eventWithRelationship.Item2!);
         }
         
-        var existingEvents = await _traceRepository
-            .GetEventsAsync(trace.Events.Select(x => x.Name).ToList());
-        
+        var eventsWithoutRelationships = existingEvents
+            .Where(x => x.Item2 is null)
+            .Select(x => x.Item1);
+
+        foreach (var eventWithoutRelationship in eventsWithoutRelationships)
+        {
+            await _traceRepository.AddRelationshipAsync(eventWithoutRelationship, existingTrace);
+        }
+
         var eventsToAdd = trace.Events
-            .Where(x => existingEvents.All(y => y.Name != x.Name));
-        
+            .Where(x => existingEvents.All(y => y.Item1.Name != x.Name));
+
         foreach (var eventToAdd in eventsToAdd)
         {
             await _traceRepository.AddEventWithRelationshipAsync(existingTrace, eventToAdd);
         }
-        
+
         await transaction!.CommitAsync();
-        
+
         return true;
     }
 
     public async Task<IEnumerable<TraceDomain>> GetTracesAsync(string name)
     {
-        return await _traceRepository.GetTracesAsync(name);
+        throw new NotImplementedException();
     }
 
     public async Task<TraceDomain?> GetTraceAsync(string name)
     {
-        return await _traceRepository.GetTraceAsync(name);
+        throw new NotImplementedException();
     }
 
     public async Task<bool> UpdateAsync(TraceDomain trace)
     {
-        var existingTrace = await _traceRepository.GetTraceAsync(trace.Name);
-        if (existingTrace is null)
-            return false;
-
-        return await _traceRepository.UpdateAsync(trace);
+        throw new NotImplementedException();
     }
 
     public async Task<bool> DeleteAsync(string id)
     {
-        var existingTrace = await _traceRepository.GetTraceAsync(id);
-        if (existingTrace is null)
-            return false;
-
-        return await _traceRepository.DeleteAsync(id);
+        throw new NotImplementedException();
     }
 }

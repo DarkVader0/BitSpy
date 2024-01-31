@@ -57,7 +57,9 @@ public static class DomainToContractMapper
         {
             Name = domain.Name,
             Message = domain.Message,
-            Timestamp = domain.Timestamp,
-            Attributes = domain.Attributes.Select(x => x.ToContract()).ToList()
+            Attributes = domain.Attributes.Select(x => x.ToContract())
+                .ToList(),
+            Timestamp = new DateTime((long)domain.Duration)
         };
+    //TODO: fix this
 }
