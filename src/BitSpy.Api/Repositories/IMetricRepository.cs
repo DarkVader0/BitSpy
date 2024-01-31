@@ -8,12 +8,12 @@ public interface IMetricRepository
     Task<IEnumerable<MetricDomain>> GetMetricsAsync(DateTime startingTimestamp, DateTime endingTimestamp);
 
     Task<MetricDomain?> GetMetricAsync(string name,
-        double cpuUsage,
+        int cpuUsage,
         DateTime timestamp);
 
     Task<bool> UpdateAsync(MetricDomain metric);
 
     Task<bool> DeleteAsync(string name,
-        double cpuUsage,
+        int cpuUsage,
         DateTime timestamp);
 }

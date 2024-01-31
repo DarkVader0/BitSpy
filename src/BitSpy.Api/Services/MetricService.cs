@@ -23,7 +23,7 @@ public sealed class MetricService : IMetricService
     }
 
     public async Task<MetricDomain?> GetMetricAsync(string name,
-        double cpuUsage,
+        int cpuUsage,
         DateTime timestamp)
     {
         return await _metricRepository.GetMetricAsync(name, cpuUsage, timestamp);
@@ -41,7 +41,7 @@ public sealed class MetricService : IMetricService
     }
 
     public async Task<bool> DeleteAsync(string name,
-        double cpuUsage,
+        int cpuUsage,
         DateTime timestamp)
     {
         var existingMetric = await _metricRepository.GetMetricAsync(name, cpuUsage, timestamp);

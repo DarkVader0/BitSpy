@@ -30,7 +30,7 @@ public class MetricEndpoints : IEndpoint
 
     private static async Task<IResult> GetMetric(
         [FromRoute] string name,
-        double cpuUsage,
+        int cpuUsage,
         DateTime timeStamp,
         IMetricService metricService)
     {
@@ -59,7 +59,7 @@ public class MetricEndpoints : IEndpoint
     }
 
     private static async Task<IResult> DeleteMetric(string name,
-        double cpuUsage,
+        int cpuUsage,
         DateTime timeStamp,
         IMetricService metricService)
     {

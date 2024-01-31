@@ -49,9 +49,9 @@ public static class DatabaseInitializer
     {
         var query = @"CREATE TABLE IF NOT EXISTS metrics (
                         name text,
-                        timeInGCSinceLastGCPercentage double,
+                        timeInGCSinceLastGCPercentage int,
                         allocationRatePerSecond int,
-                        cpuUsage double,
+                        cpuUsage int,
                         exceptionCount int,
                         gen0CollectionCount int,
                         gen0Size int,
