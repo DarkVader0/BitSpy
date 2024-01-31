@@ -1,4 +1,5 @@
-﻿using BitSpy.Api.Contracts.Request;
+﻿using BitSpy.Api.Contracts.Database.Relationships;
+using BitSpy.Api.Contracts.Request;
 using BitSpy.Api.Models;
 
 namespace BitSpy.Api.Mappers;
@@ -39,8 +40,7 @@ public static class ContractToDomainMapper
         => new()
         {
             Name = request.Name,
-            StartTime = request.StartTime,
-            EndTime = request.EndTime,
+            Duration = (long)(request.EndTime - request.StartTime).TotalMilliseconds,
             Attributes = request.Attributes.Select(x => x.ToDomain())
                 .ToList(),
             Events = request.Events.Select(x => x.ToDomain())
@@ -55,13 +55,16 @@ public static class ContractToDomainMapper
             Value = request.Value
         };
     
-    public static EventDomain ToDomain(this EventRequest request)
+    public static TraceEventRelationshipDomain ToDomain(this EventRequest request)
         => new()
         {
+            EventCounter = 0,
+            EventAvgDuration = 0,
+            Event = new(){
             Name = request.Name,
             Message = request.Message,
             Attributes = request.Attributes.Select(x => x.ToDomain())
                 .ToList(),
             Duration = request.Timestamp.Millisecond
-        };
+        }};
 }

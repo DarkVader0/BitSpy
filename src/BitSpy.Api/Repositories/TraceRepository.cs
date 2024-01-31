@@ -52,7 +52,7 @@ public class TraceRepository : ITraceRepository
                 Name = traceContractNode.Properties["Name"]
                     .As<string>(),
                 AverageDuration = traceContractNode.Properties["AverageDuration"]
-                    .As<decimal>(),
+                    .As<long>(),
                 Attributes = JsonSerializer.Deserialize<List<AttributeDomain>>(traceContractNode
                     .Properties["Attributes"]
                     .As<string>())!,
@@ -96,7 +96,7 @@ public class TraceRepository : ITraceRepository
             Name = traceContractNode.Properties["Name"]
                 .As<string>(),
             AverageDuration = traceContractNode.Properties["AverageDuration"]
-                .As<decimal>(),
+                .As<long>(),
             Attributes = JsonSerializer.Deserialize<List<AttributeDomain>>(traceContractNode.Properties["Attributes"]
                 .As<string>())!,
             TraceCounter = 0
@@ -178,7 +178,9 @@ public class TraceRepository : ITraceRepository
             });
     }
 
-    public async Task UpdateRelationshipAsync(string traceName, string eventName, TraceEventRelationship relationship)
+    public async Task UpdateRelationshipAsync(string traceName,
+        string eventName,
+        TraceEventRelationship relationship)
     {
         var session = _driver.AsyncSession();
         await session.RunAsync(
@@ -192,7 +194,8 @@ public class TraceRepository : ITraceRepository
             });
     }
 
-    public async Task<IEnumerable<(EventContract, TraceEventRelationship?)>> GetEventsAsync(IEnumerable<string> names, string traceName)
+    public async Task<IEnumerable<(EventContract, TraceEventRelationship?)>> GetEventsAsync(IEnumerable<string> names,
+        string traceName)
     {
         var session = _driver.AsyncSession();
         var result = await session.RunAsync(
@@ -213,7 +216,7 @@ public class TraceRepository : ITraceRepository
             {
                 Name = eventContractNode.Properties["Name"].As<string>(),
                 Message = eventContractNode.Properties["Message"].As<string>(),
-                Duration = eventContractNode.Properties["Duration"].As<decimal>(),
+                Duration = eventContractNode.Properties["Duration"].As<long>(),
                 Attributes =
                     JsonSerializer.Deserialize<List<AttributeDomain>>(eventContractNode.Properties["Attributes"]
                         .As<string>())!
@@ -226,7 +229,7 @@ public class TraceRepository : ITraceRepository
                 relationship = new TraceEventRelationship
                 {
                     EventCounter = relationshipNode.Properties["EventCounter"].As<long>(),
-                    EventAvgDuration = relationshipNode.Properties["EventAvgDuration"].As<decimal>()
+                    EventAvgDuration = relationshipNode.Properties["EventAvgDuration"].As<long>()
                 };
             }
 
@@ -267,6 +270,254 @@ public class TraceRepository : ITraceRepository
             });
     }
 
+    public async Task<List<TraceDomain>> GetBottleneckTraceAsync(
+        long duration,
+        int traceCounter)
+    {
+        var session = _driver.AsyncSession();
+        var result = await session.RunAsync(
+            "MATCH (t:TraceContract)-[r:TraceEventRelationship]->(e:EventContract) WHERE t.AverageDuration >= $duration AND t.TraceCounter >= $traceCounter RETURN t, r, e",
+            new Dictionary<string, object>
+            {
+                { "duration", duration },
+                { "traceCounter", traceCounter }
+            });
+
+        var records = await result.ToListAsync();
+
+        var traces = new List<TraceDomain>();
+        foreach (var record in records)
+        {
+            var traceNode = record["t"].As<INode>();
+            var traceName = traceNode.Properties["Name"].As<string>();
+
+            var traceDomain = traces.FirstOrDefault(t => t.Name == traceName);
+            if (traceDomain == null)
+            {
+                traceDomain = new TraceDomain
+                {
+                    Name = traceName,
+                    Attributes =
+                        JsonSerializer.Deserialize<List<AttributeDomain>>(traceNode.Properties["Attributes"]
+                                .As<string>())!
+                            .Select(a => new AttributeDomain { Name = a.Name, Value = a.Value }).ToList(),
+                    Duration = traceNode.Properties["AverageDuration"].As<long>(),
+                    IpAddress = string.Empty,
+                    Events = new List<TraceEventRelationshipDomain>()
+                };
+                traces.Add(traceDomain);
+            }
+
+            var relationshipNode = record["r"].As<IRelationship>();
+            var relationship = new TraceEventRelationship
+            {
+                EventCounter = relationshipNode.Properties["EventCounter"].As<long>(),
+                EventAvgDuration = relationshipNode.Properties["EventAvgDuration"].As<long>()
+            };
+
+            var eventNode = record["e"].As<INode>();
+            var eventContract = new EventContract
+            {
+                Name = eventNode.Properties["Name"].As<string>(),
+                Message = eventNode.Properties["Message"].As<string>(),
+                Duration = eventNode.Properties["Duration"].As<long>(),
+                Attributes =
+                    JsonSerializer.Deserialize<List<AttributeDomain>>(eventNode.Properties["Attributes"].As<string>())!
+            };
+
+            var eventDomain = new TraceEventRelationshipDomain()
+            {
+                EventCounter = relationship.EventCounter,
+                EventAvgDuration = relationship.EventAvgDuration,
+                Event = new()
+                {
+                    Name = eventContract.Name,
+                    Message = eventContract.Message,
+                    Duration = eventContract.Duration,
+                    Attributes = eventContract.Attributes
+                        .Select(a => new AttributeDomain { Name = a.Name, Value = a.Value }).ToList(),
+                }
+            };
+
+            traceDomain.Events.Add(eventDomain);
+        }
+
+        return traces;
+    }
+
+    public async Task<List<EventDomain>> GetBottleneckEventAsync(long duration, string? name)
+    {
+        var session = _driver.AsyncSession();
+
+        var cypherQuery = string.IsNullOrEmpty(name)
+            ? "MATCH (e:EventContract) WHERE e.Duration >= $duration RETURN e"
+            : "MATCH (t:TraceContract {Name: $name})-[r:TraceEventRelationship]->(e:EventContract) WHERE e.Duration >= $duration RETURN e";
+
+        var result = await session.RunAsync(
+            cypherQuery,
+            new Dictionary<string, object>
+            {
+                { "duration", duration },
+                { "name", name }
+            });
+        var records = await result.ToListAsync();
+
+        var events = new List<EventDomain>();
+        foreach (var record in records)
+        {
+            var eventNode = record["e"].As<INode>();
+            var eventDomain = new EventDomain
+            {
+                Name = eventNode.Properties["Name"].As<string>(),
+                Message = eventNode.Properties["Message"].As<string>(),
+                Duration = eventNode.Properties["Duration"].As<long>(),
+                Attributes =
+                    JsonSerializer.Deserialize<List<AttributeDomain>>(eventNode.Properties["Attributes"].As<string>())!
+            };
+
+            events.Add(eventDomain);
+        }
+
+        return events;
+    }
+
+    public async Task<List<TraceDomain>> GetTracesForIpAsync(string ip)
+    {
+        var session = _driver.AsyncSession();
+        var result = await session.RunAsync(
+            "MATCH (ip:IpUserContract {IpAddress: $ip})-[r:IpUserTraceRelationship]->(t:TraceContract) RETURN t ORDER BY r.RequestCounter DESC LIMIT 3",
+            new Dictionary<string, object>
+            {
+                { "ip", ip }
+            });
+
+        var records = await result.ToListAsync();
+
+        var traces = new List<TraceDomain>();
+        foreach (var record in records)
+        {
+            var traceNode = record["t"].As<INode>();
+            var traceDomain = new TraceDomain
+            {
+                Name = traceNode.Properties["Name"].As<string>(),
+                Attributes =
+                    JsonSerializer.Deserialize<List<AttributeDomain>>(traceNode.Properties["Attributes"].As<string>())!,
+                Duration = traceNode.Properties["AverageDuration"].As<long>(),
+                IpAddress = ip
+            };
+
+            traces.Add(traceDomain);
+        }
+
+        return traces;
+    }
+
+    public async Task<TraceContract?> GetTraceByNameAsync(string name)
+    {
+        var session = _driver.AsyncSession();
+        var result = await session.RunAsync(
+            "MATCH (t:TraceContract {Name: $name}) RETURN t",
+            new Dictionary<string, object>
+            {
+                { "name", name }
+            });
+
+        var record = (await result.ToListAsync()).FirstOrDefault();
+
+        if (record == null)
+        {
+            return null;
+        }
+
+        var traceNode = record["t"].As<INode>();
+        return new TraceContract
+        {
+            Name = traceNode.Properties["Name"].As<string>(),
+            AverageDuration = traceNode.Properties["AverageDuration"].As<long>(),
+            Attributes =
+                JsonSerializer.Deserialize<List<AttributeDomain>>(traceNode.Properties["Attributes"].As<string>())!,
+            TraceCounter = traceNode.Properties["TraceCounter"].As<long>()
+        };
+    }
+
+    public async Task<EventContract?> GetEventByNameAsync(string name)
+    {
+        var session = _driver.AsyncSession();
+        var result = await session.RunAsync(
+            "MATCH (e:EventContract {Name: $name}) RETURN e",
+            new Dictionary<string, object>
+            {
+                { "name", name }
+            });
+
+        var record = (await result.ToListAsync()).FirstOrDefault();
+
+        if (record == null)
+        {
+            return null;
+        }
+
+        var eventNode = record["e"].As<INode>();
+        return new EventContract
+        {
+            Name = eventNode.Properties["Name"].As<string>(),
+            Message = eventNode.Properties["Message"].As<string>(),
+            Duration = eventNode.Properties["Duration"].As<long>(),
+            Attributes =
+                JsonSerializer.Deserialize<List<AttributeDomain>>(eventNode.Properties["Attributes"].As<string>())!
+        };
+    }
+
+    public async Task UpdateEventAsync(EventContract eventContract)
+    {
+        var session = _driver.AsyncSession();
+        await session.RunAsync(
+            "MATCH (e:EventContract {Name: $name}) SET e.Message = $message, e.Duration = $duration, e.Attributes = $attributes",
+            new Dictionary<string, object>
+            {
+                { "name", eventContract.Name },
+                { "message", eventContract.Message },
+                { "duration", eventContract.Duration },
+                { "attributes", JsonSerializer.Serialize(eventContract.Attributes) }
+            });
+    }
+
+    public async Task UpdateTraceAsync(TraceContract traceContract)
+    {
+        var session = _driver.AsyncSession();
+        await session.RunAsync(
+            "MATCH (t:TraceContract {Name: $name}) SET t.AverageDuration = $averageDuration, t.Attributes = $attributes, t.TraceCounter = $traceCounter",
+            new Dictionary<string, object>
+            {
+                { "name", traceContract.Name },
+                { "averageDuration", traceContract.AverageDuration },
+                { "attributes", JsonSerializer.Serialize(traceContract.Attributes) },
+                { "traceCounter", traceContract.TraceCounter }
+            });
+    }
+
+    public async Task DeleteTraceAsync(string name)
+    {
+        var session = _driver.AsyncSession();
+        await session.RunAsync(
+            "MATCH (t:TraceContract {Name: $name}) DETACH DELETE t",
+            new Dictionary<string, object>
+            {
+                { "name", name }
+            });
+    }
+
+    public async Task DeleteEventAsync(string name)
+    {
+        var session = _driver.AsyncSession();
+        await session.RunAsync(
+            "MATCH (e:EventContract {Name: $name}) DETACH DELETE e",
+            new Dictionary<string, object>
+            {
+                { "name", name }
+            });
+    }
+
     public async Task<EventContract> CreateEventAsync(EventContract eventContract)
     {
         var session = _driver.AsyncSession();
@@ -287,12 +538,11 @@ public class TraceRepository : ITraceRepository
         {
             Name = eventContractNode.Properties["Name"].As<string>(),
             Message = eventContractNode.Properties["Message"].As<string>(),
-            Duration = eventContractNode.Properties["Duration"].As<decimal>(),
+            Duration = eventContractNode.Properties["Duration"].As<long>(),
             Attributes =
                 JsonSerializer.Deserialize<List<AttributeDomain>>(eventContractNode.Properties["Attributes"]
                     .As<string>())!
         };
-
         return createdEventContract;
     }
 }

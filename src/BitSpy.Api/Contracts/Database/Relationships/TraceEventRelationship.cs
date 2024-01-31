@@ -3,5 +3,5 @@
 public class TraceEventRelationship
 {
     public long EventCounter { get; set; } = 0;
-    public decimal EventAvgDuration { get; set; } = 0;
+    public long EventAvgDuration { get; set; } = 0;
 }

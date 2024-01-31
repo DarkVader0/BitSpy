@@ -25,4 +25,13 @@ public interface ITraceRepository
     Task<IEnumerable<(EventContract, TraceEventRelationship?)>> GetEventsAsync(IEnumerable<string> names, string traceName);
     Task AddEventWithRelationshipAsync(TraceContract trace, EventDomain eventContract);
     Task AddRelationshipAsync(EventContract traceEventRelationship, TraceContract traceContract);
+    Task<List<TraceDomain>> GetBottleneckTraceAsync(long duration, int traceCounter);
+    Task<List<EventDomain>> GetBottleneckEventAsync(long duration, string? traceName);
+    Task<List<TraceDomain>> GetTracesForIpAsync(string ip);
+    Task<TraceContract?> GetTraceByNameAsync(string name);
+    Task<EventContract?> GetEventByNameAsync(string name);
+    Task UpdateEventAsync(EventContract eventContract);
+    Task UpdateTraceAsync(TraceContract traceContract);
+    Task DeleteTraceAsync(string name);
+    Task DeleteEventAsync(string name);
 }

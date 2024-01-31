@@ -1,12 +1,20 @@
-﻿using BitSpy.Api.Models;
+﻿using BitSpy.Api.Contracts.Response;
+using BitSpy.Api.Models;
 
 namespace BitSpy.Api.Services;
 
 public interface ITraceService
 {
     Task<bool> SaveAsync(TraceDomain trace);
-    Task<IEnumerable<TraceDomain>> GetTracesAsync(string name);
-    Task<TraceDomain?> GetTraceAsync(string name);
-    Task<bool> UpdateAsync(TraceDomain trace);
-    Task<bool> DeleteAsync(string id);
+    Task<bool> UpdateTraceAsync(string name, TraceDomain trace);
+    Task<bool> UpdateEventAsync(string name, TraceEventRelationshipDomain eventDomain);
+    Task<bool> DeleteTraceAsync(string name);
+    Task<bool> DeleteEventAsync(string name);
+    
+    Task<List<TraceResponse>> GetBottleneckTraceAsync(long duration, int traceCounter);
+    Task<List<EventResponse>> GetBottleneckEventAsync(long duration, string traceName);
+    Task<List<TraceResponse>> GetTracesForIpAsync(string ip);
+    
+    
+    
 }
