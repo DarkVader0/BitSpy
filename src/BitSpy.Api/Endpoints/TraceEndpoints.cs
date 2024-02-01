@@ -13,13 +13,13 @@ public class TraceEndpoints : IEndpoint
     public static void DefineEndpoints(IEndpointRouteBuilder app)
     {
         app.MapPost(BaseRoute, CreateTrace);
-        app.MapGet(BaseRoute + "/bottleneck/traces", GetBottleneckTraces);
-        app.MapGet(BaseRoute + "/bottleneck/events", GetBottleneckEvents);
+        app.MapGet( "/bottleneck/traces", GetBottleneckTraces);
+        app.MapGet("/bottleneck/events", GetBottleneckEvents);
         app.MapGet(BaseRoute + "/ip/{ip}", GetTracesForIp);
-        app.MapPut(BaseRoute + "traces/{traceName}", UpdateTrace);
-        app.MapPut(BaseRoute + "events/{eventName}", UpdateEvent);
-        app.MapDelete(BaseRoute + "traces/{traceName}", DeleteTrace);
-        app.MapDelete(BaseRoute + "events/{eventName}", DeleteEvent);
+        app.MapPut("/traces/{traceName}", UpdateTrace);
+        app.MapPut("/events/{eventName}", UpdateEvent);
+        app.MapDelete("/traces/{traceName}", DeleteTrace);
+        app.MapDelete("/events/{eventName}", DeleteEvent);
     }
 
     private static async Task<IResult> UpdateEvent(string eventName,

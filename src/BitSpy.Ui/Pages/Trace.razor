@@ -5,97 +5,74 @@
 <PageTitle>Traces</PageTitle>
 
 <h1>Traces</h1>
-@foreach (var trace in traces)
+
+
+<input type="text" @bind="_searchTerm" placeholder="Search by trace name..." />
+<button @onclick="Search">Search</button>
+
+@if (_traces.Count == 0)
 {
-    <div class="border-1">
-        <h2>@trace.Name</h2>
-
-        @foreach (var traceAttribute in trace.Attributes)
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Duration</th>
+            <th>Attributes</th>
+            <th>Events</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var trace in _traces)
         {
-            <p>@traceAttribute.Name: @traceAttribute.Value</p>
+            <tr>
+                <td>@trace.Name</td>
+                <td>@trace.Duration.ToString()</td>
+                <td>
+                    <ul>
+                        @foreach (var a in trace.Attributes)
+                        {
+                            <li>@a.Name: @a.Value</li>
+                        }
+                    </ul>
+                </td>
+                <td>
+                    <ul>
+                        @foreach (var eventRelationship in trace.Events)
+                        {
+                            <li>@eventRelationship.Event.Name</li>
+                            <li>@eventRelationship.EventAvgDuration.ToString()</li>
+                            
+                        }
+                    </ul>
+                </td>
+            </tr>
         }
-
-        <div class="chart">
-            @{
-                var maxDuration = (trace.EndTime - trace.StartTime).TotalMilliseconds;
-                var duration = (trace.Events[0].Timestamp - trace.StartTime).TotalMilliseconds;
-            }
-
-            <div class="bar" style="width: @(duration / maxDuration * 100)%">
-                <span>@trace.Name: @duration ms</span>
-            </div>
-            @{
-                var cumulativeDuration = 0.0;
-                for (var i = 0; i < trace.Events.Count - 1; i++)
-                {
-                    duration = (trace.Events[i + 1].Timestamp - trace.Events[i].Timestamp).TotalMilliseconds;
-                    cumulativeDuration += duration;
-                    <div class="bar" style="width: @(duration / maxDuration * 100)%; margin-left: @(cumulativeDuration / maxDuration * 100)%">
-                        <span>@trace.Events[i].Name: @duration ms</span>
-                    </div>
-                }
-
-                var lastDuration = (trace.EndTime - trace.Events[^1].Timestamp).TotalMilliseconds;
-                cumulativeDuration += lastDuration;
-                <div class="bar" style="width: @(lastDuration / maxDuration * 100)%; margin-left: @(cumulativeDuration / maxDuration * 100)%">
-                    <span>@trace.Events[^1].Name: @lastDuration ms</span>
-                </div>
-            }
-        </div>
-    </div>
+        </tbody>
+    </table>
 }
 
 @code {
-    private List<TraceResponse> traces = new();
+    private List<TraceResponse> _traces = new();
+    
+    private string _searchTerm = string.Empty;
+    
 
     protected override async Task OnInitializedAsync()
     {
-        traces.Add(new TraceResponse
-        {
-            Name = "test",
-            StartTime = DateTime.Now,
-            EndTime = DateTime.Now.AddMilliseconds(200),
-            Attributes = new List<AttributeResponse>()
-            {
-                new AttributeResponse()
-                {
-                    Name = "Tessst",
-                    Value = "Test"
-                },
-                new AttributeResponse()
-                {
-                    Name = "Tessst",
-                    Value = "Test"
-                }
-            },
-            Events = new List<EventResponse>()
-            {
-                new EventResponse
-                {
-                    Name = "Method1",
-                    Message = "eeee",
-                    Timestamp = DateTime.Now.AddMilliseconds(50),
-                    Attributes = null
-                },
-                new EventResponse
-                {
-                    Name = "Method2",
-                    Message = "eeee",
-                    Timestamp = DateTime.Now.AddMilliseconds(100),
-                    Attributes = null
-                },
-                new EventResponse
-                {
-                    Name = "Method3",
-                    Message = "eeee",
-                    Timestamp = DateTime.Now.AddMilliseconds(150),
-                    Attributes = null
-                }
-            }
-        });
-        return;
-        var response = await client.GetAsync($"{ApiConstants.ApiUrl}/traces?name=string2");
-        traces = await response.Content.ReadFromJsonAsync<List<TraceResponse>>() ?? new List<TraceResponse>();
+        var response = await client.GetAsync($"{ApiConstants.ApiUrl}/bottleneck/traces");
+        _traces = await response.Content.ReadFromJsonAsync<List<TraceResponse>>() ?? new();
+        _traces.ForEach(x => Console.WriteLine("{0} {1}", x.Name, x.Duration));
+    }
+    
+    private async Task Search()
+    {
+        var response = await client.GetAsync($"{ApiConstants.ApiUrl}/bottleneck/traces?name={_searchTerm}");
+        _traces = await response.Content.ReadFromJsonAsync<List<TraceResponse>>() ?? new();
+        await InvokeAsync(StateHasChanged);
     }
 
 }

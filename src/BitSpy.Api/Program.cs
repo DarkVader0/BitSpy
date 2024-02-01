@@ -15,13 +15,26 @@ builder.Services.AddScoped<IMetricRepository, MetricRepository>();
 builder.Services.AddScoped<ITraceRepository, TraceRepository>();
 builder.Services.AddScoped<ILongTermTraceRepository, LongTermTraceRepository>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins",
+        b =>
+        {
+            b.AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        });
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
 await DatabaseInitializer.InitializeAsync(builder.Configuration);
+
 app.UseMiddleware<ErrorHandlingMiddleware>();
+app.UseCors("AllowAllOrigins");
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseEndpoints();
