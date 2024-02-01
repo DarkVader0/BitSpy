@@ -7,12 +7,18 @@
 <h1>Traces</h1>
 
 
-<input type="text" @bind="_searchTerm" placeholder="Search by trace name..." />
-<button @onclick="Search">Search</button>
-
+<form @onsubmit="async () => await Search()">
+    <label>Duration</label>
+    <input type="number" @bind="_traceDuration" placeholder="Search by trace duration..."/>
+    <label>Trace counter</label>
+    <input type="number" @bind="_traceCounter" placeholder="Search by trace counter..."/>
+    <button type="submit" >Search</button>
+</form>
 @if (_traces.Count == 0)
 {
-    <p><em>Loading...</em></p>
+    <p>
+        <em>There are no traces with this parameters</em>
+    </p>
 }
 else
 {
@@ -45,7 +51,6 @@ else
                         {
                             <li>@eventRelationship.Event.Name</li>
                             <li>@eventRelationship.EventAvgDuration.ToString()</li>
-                            
                         }
                     </ul>
                 </td>
@@ -57,22 +62,26 @@ else
 
 @code {
     private List<TraceResponse> _traces = new();
-    
-    private string _searchTerm = string.Empty;
-    
+
+    private long _traceDuration = 0;
+    private long _traceCounter = 0;
+
 
     protected override async Task OnInitializedAsync()
     {
-        var response = await client.GetAsync($"{ApiConstants.ApiUrl}/bottleneck/traces");
-        _traces = await response.Content.ReadFromJsonAsync<List<TraceResponse>>() ?? new();
-        _traces.ForEach(x => Console.WriteLine("{0} {1}", x.Name, x.Duration));
+        await LoadData();
     }
-    
+
     private async Task Search()
     {
-        var response = await client.GetAsync($"{ApiConstants.ApiUrl}/bottleneck/traces?name={_searchTerm}");
-        _traces = await response.Content.ReadFromJsonAsync<List<TraceResponse>>() ?? new();
+        await LoadData();
         await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task LoadData()
+    {
+        var response = await client.GetAsync($"{ApiConstants.ApiUrl}/bottleneck/traces?duration={_traceDuration}&traceCounter={_traceCounter}");
+        _traces = await response.Content.ReadFromJsonAsync<List<TraceResponse>>() ?? new();
     }
 
 }
