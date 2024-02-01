@@ -1,0 +1,44 @@
+﻿@using BitSpy.Ui.Response
+@using System.Net.Http.Headers
+@inject HttpClient HttpClient
+
+<div class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Trace</h5>
+                <button type="button" class="btn-close" @onclick="Close"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="Trace" OnValidSubmit="UpdateTrace">
+                    <InputText id="name" @bind-Value="@Trace.Name" />
+                    <button type="submit">Update</button>
+                </EditForm>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="Close">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public TraceResponse Trace { get; set; }
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    private void Close()
+    {
+        OnClose.InvokeAsync();
+    }
+
+    private async Task UpdateTrace()
+    {
+        var response = await HttpClient.PutAsJsonAsync($"{ApiConstants.ApiUrl}/traces/{Trace.Name}", Trace);
+
+        Close();
+    }
+}

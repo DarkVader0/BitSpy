@@ -1,19 +1,21 @@
 ﻿@page "/traces"
 @using BitSpy.Ui.Response
-@inject HttpClient client
+@using BitSpy.Ui.Components
+@inject HttpClient Client
 
 <PageTitle>Traces</PageTitle>
 
 <h1>Traces</h1>
 
 
-<form @onsubmit="async () => await Search()">
+<form @onsubmit="async () => await SearchTraces()">
     <label>Duration</label>
     <input type="number" @bind="_traceDuration" placeholder="Search by trace duration..."/>
     <label>Trace counter</label>
     <input type="number" @bind="_traceCounter" placeholder="Search by trace counter..."/>
-    <button type="submit" >Search</button>
+    <button type="submit">Search</button>
 </form>
+
 @if (_traces.Count == 0)
 {
     <p>
@@ -54,6 +56,72 @@ else
                         }
                     </ul>
                 </td>
+                <td>
+                    <button @onclick="() => OpenTraceModal(trace)">Edit</button>
+                </td>
+
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@if(_showEventModal)
+{
+    <EditEventModal Event="@_selectedEvent" OnClose="async () => await OnEventModalClosed()" />
+}
+
+
+@if (_showTraceModal)
+{
+    Console.WriteLine("Ovde 3 sam");
+    <EditTraceModal Trace="@_selectedTrace" OnClose="async () => await OnTraceModalClosed()" />
+}
+
+<h1>Events</h1>
+
+<form @onsubmit="async () => await SearchEvents()">
+    <label>Event duration</label>
+    <input type="number" @bind="_eventDuration" placeholder="Search by event duration..."/>
+    <label>Trace name</label>
+    <input type="text" @bind="_traceName" placeholder="Search by trace name..."/>
+    <button type="submit">Search</button>
+</form>
+
+
+@if (_events.Count == 0)
+{
+    <em>There are no events with this parameters</em>
+}
+else
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Message</th>
+            <th>Duration</th>
+            <th>Attributes</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var e in _events)
+        {
+            <tr>
+                <td>@e.Name</td>
+                <td>@e.Message</td>
+                <td>@e.Duration</td>
+                <td>
+                    <ul>
+                        @foreach (var a in e.Attributes)
+                        {
+                            <li>@a.Name: @a.Value</li>
+                        }
+                    </ul>
+                </td>
+                <td>
+                    <button @onclick="() => OpenEventModal(e)">Edit</button>
+                </td>
             </tr>
         }
         </tbody>
@@ -62,26 +130,76 @@ else
 
 @code {
     private List<TraceResponse> _traces = new();
-
     private long _traceDuration = 0;
     private long _traceCounter = 0;
+    private bool _showTraceModal = false;
 
+    private List<EventResponse> _events = new();
+    private long _eventDuration = 0;
+    private string _traceName = string.Empty;
+    private bool _showEventModal = false;
+
+    private TraceResponse _selectedTrace;
+    private EventResponse _selectedEvent;
+    
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadData();
+        await LoadTraces();
+        await LoadEvents();
     }
 
-    private async Task Search()
+    private async Task SearchTraces()
     {
-        await LoadData();
+        await LoadTraces();
         await InvokeAsync(StateHasChanged);
     }
 
-    private async Task LoadData()
+    private async Task LoadTraces()
     {
-        var response = await client.GetAsync($"{ApiConstants.ApiUrl}/bottleneck/traces?duration={_traceDuration}&traceCounter={_traceCounter}");
+        var response = await Client.GetAsync($"{ApiConstants.ApiUrl}/bottleneck/traces?duration={_traceDuration}&traceCounter={_traceCounter}");
         _traces = await response.Content.ReadFromJsonAsync<List<TraceResponse>>() ?? new();
+    }
+
+    private async Task LoadEvents()
+    {
+        var response = await Client.GetAsync($"{ApiConstants.ApiUrl}/bottleneck/events?duration={_eventDuration}&traceName={_traceName}");
+        _events = await response.Content.ReadFromJsonAsync<List<EventResponse>>() ?? new();
+    }
+
+    private async Task SearchEvents()
+    {
+        await LoadEvents();
+        await InvokeAsync(StateHasChanged);
+    }
+    
+    private void OpenTraceModal(TraceResponse trace)
+    {
+        _selectedTrace = trace;
+        _showTraceModal = true;
+
+        StateHasChanged();
+    }
+    
+    private void OpenEventModal(EventResponse @event)
+    {
+        _selectedEvent = @event;
+        _showEventModal = true;
+        Console.WriteLine("Ovde sam");
+        StateHasChanged();
+    }
+
+
+    private async Task OnEventModalClosed()
+    {
+        _showEventModal = false;
+        await InvokeAsync(StateHasChanged);
+    }
+    
+    private async Task OnTraceModalClosed()
+    {
+        _showTraceModal = false;
+        await InvokeAsync(StateHasChanged);
     }
 
 }
