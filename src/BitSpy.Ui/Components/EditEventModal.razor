@@ -2,22 +2,27 @@
 @using System.Net.Http.Headers
 @inject HttpClient HttpClient
 
-<div class="modal" tabindex="-1">
+
+<div class="modal fade show" id="myModal" style="display:block; background-color: rgba(10,10,10,.8);" aria-modal="true" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Edit Event</h5>
-                <button type="button" class="btn-close" @onclick="Close"></button>
+                <h4 class="modal-title">Edit event</h4>
+                <button type="button" class="close" @onclick="@ModalCancel">&times;</button>
             </div>
             <div class="modal-body">
-                <EditForm Model="Event" OnValidSubmit="UpdateEvent">
-                    <InputText id="name" @bind-Value="@Event.Name" />
-                    <!-- Add other fields as necessary -->
-                    <button type="submit">Update</button>
-                </EditForm>
+                <input type="text" @bind="@Event.Name"/>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" @onclick="Close">Close</button>
+                @switch (DialogType)
+                {
+                    case ModalDialogType.Ok:
+                        <button type="button" class="btn btn-primary" @onclick=@ModalOk>OK</button>
+                        break;
+                    case ModalDialogType.Cancel:
+                        <button type="button" class="btn" @onclick="@ModalCancel">Cancel</button>
+                        break;
+                }
             </div>
         </div>
     </div>
@@ -31,14 +36,29 @@
     [Parameter]
     public EventCallback OnClose { get; set; }
 
-    private void Close()
-    {
-        OnClose.InvokeAsync();
-    }
-
     private async Task UpdateEvent()
     {
         await HttpClient.PutAsJsonAsync($"{ApiConstants.ApiUrl}/events/{Event.Name}", Event);
-        Close();
     }
+
+    [Parameter]
+    public ModalDialogType DialogType { get; set; }
+
+    private Task ModalCancel()
+    {
+        return OnClose.InvokeAsync();
+    }
+
+    private Task ModalOk()
+    {
+        UpdateEvent().GetAwaiter().GetResult();
+        return OnClose.InvokeAsync();
+    }
+
+    public enum ModalDialogType
+    {
+        Ok,
+        Cancel
+    }
+
 }
