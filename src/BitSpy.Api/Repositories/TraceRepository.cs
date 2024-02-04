@@ -351,7 +351,7 @@ public class TraceRepository : ITraceRepository
 
         var cypherQuery = string.IsNullOrEmpty(name)
             ? "MATCH (e:EventContract) WHERE e.Duration >= $duration RETURN e"
-            : "MATCH (t:TraceContract {Name: $name})-[r:TraceEventRelationship]->(e:EventContract) WHERE e.Duration >= $duration RETURN e";
+            : "MATCH (t:TraceContract)-[r:TraceEventRelationship]->(e:EventContract) WHERE t.Name CONTAINS $name AND e.Duration >= $duration RETURN e";
 
         var result = await session.RunAsync(
             cypherQuery,

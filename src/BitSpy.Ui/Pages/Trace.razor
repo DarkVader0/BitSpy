@@ -1,6 +1,10 @@
 ﻿@page "/traces"
 @using BitSpy.Ui.Response
 @using BitSpy.Ui.Components
+@using Syncfusion.Blazor.Charts;
+@using Syncfusion.Blazor.Inputs;
+@using Syncfusion.Blazor
+@using System.Globalization
 @inject HttpClient Client
 
 <PageTitle>Traces</PageTitle>
@@ -57,7 +61,7 @@ else
                     </ul>
                 </td>
                 <td>
-                    <button @onclick="() => OpenTraceModal(trace)">Edit</button>
+                    <button @onclick="async () => await OpenTraceModal(trace)">Edit</button>
                 </td>
 
             </tr>
@@ -68,13 +72,14 @@ else
 
 @if(_showEventModal)
 {
+    Console.WriteLine("Renderujemo event modal");
     <EditEventModal Event="@_selectedEvent" OnClose="async () => await OnEventModalClosed()" />
 }
 
 
 @if (_showTraceModal)
 {
-    Console.WriteLine("Ovde 3 sam");
+    Console.WriteLine("Renderujemo trace modal");
     <EditTraceModal Trace="@_selectedTrace" OnClose="async () => await OnTraceModalClosed()" />
 }
 
@@ -128,6 +133,58 @@ else
     </table>
 }
 
+@*
+<div class="control-section" align='center'>
+    <SfChart Title="Family Expenses for Year" Width="@Width">
+        <ChartArea><ChartAreaBorder Width="0"></ChartAreaBorder></ChartArea>
+        <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category" Interval="1" LabelIntersectAction="@Label" LabelRotation="@Rotation">
+            <ChartAxisMajorGridLines Width="0"></ChartAxisMajorGridLines>
+            <ChartAxisMinorGridLines Width="0"></ChartAxisMinorGridLines>
+            <ChartAxisMajorTickLines Width="0"></ChartAxisMajorTickLines>
+            <ChartAxisMinorTickLines Width="0"></ChartAxisMinorTickLines>
+            <ChartAxisLineStyle Width="0"></ChartAxisLineStyle>
+        </ChartPrimaryXAxis>
+        <ChartPrimaryYAxis LabelFormat="${value}" Interval="100" Minimum="0" Maximum="400">
+            <ChartAxisMajorGridLines Width="1"></ChartAxisMajorGridLines>
+            <ChartAxisMinorGridLines Width="1"></ChartAxisMinorGridLines>
+            <ChartAxisMajorTickLines Width="0"></ChartAxisMajorTickLines>
+            <ChartAxisMinorTickLines Width="0"></ChartAxisMinorTickLines>
+            <ChartAxisLineStyle Width="0"></ChartAxisLineStyle>
+        </ChartPrimaryYAxis>
+        <ChartTooltipSettings Enable="true"></ChartTooltipSettings>
+        <ChartLegendSettings EnableHighlight="true"></ChartLegendSettings>
+        <ChartSeriesCollection>
+            <ChartSeries DataSource="@ChartTraceData" XName="Day" YName="Count" Width="2"
+                         Opacity="1" YName="JohnExpenses" Type="ChartSeriesType.StackingColumn">
+                <ChartMarker IsFilled="true" Visible="true" Height="7"  Width="7" Shape="ChartShape.Circle">
+                </ChartMarker>
+            </ChartSeries>
+        </ChartSeriesCollection>
+    </SfChart>
+</div>
+*@
+
+
+<div  class="control-section" align="center">
+        <div class="control-section">
+            <SfAccumulationChart EnableBorderOnMouseMove="false" Title="Event duration in ms" EnableAnimation="true">
+                <AccumulationChartTooltipSettings Header="" Format="<b>${point.x}</b><br>Browser Share: <b>${point.y}%</b>" Enable="true"></AccumulationChartTooltipSettings>
+                <AccumulationChartLegendSettings Visible="false"></AccumulationChartLegendSettings>
+                <AccumulationChartSeriesCollection>
+                    <AccumulationChartSeries DataSource="@_events" XName="Name" YName="Duration" Radius="@_eventPieRadius" Name="Name" StartAngle="@StartAngle"
+                                             InnerRadius="0%" ExplodeIndex="0" Explode="true" ExplodeOffset="@_explodeRadius">
+                        <AccumulationDataLabelSettings Visible="true" Name="Label" Position="AccumulationLabelPosition.Outside">
+                            <AccumulationChartDataLabelFont Size=@Size FontWeight="600"></AccumulationChartDataLabelFont>
+                            <AccumulationChartConnector Length=@_eventPieConnectorLength Type="ConnectorType.Curve"></AccumulationChartConnector>
+                        </AccumulationDataLabelSettings>
+                    </AccumulationChartSeries>
+                </AccumulationChartSeriesCollection>
+            </SfAccumulationChart>
+        </div>
+    </div>
+
+
+
 @code {
     private List<TraceResponse> _traces = new();
     private long _traceDuration = 0;
@@ -139,10 +196,31 @@ else
     private string _traceName = string.Empty;
     private bool _showEventModal = false;
 
-    private TraceResponse _selectedTrace;
-    private EventResponse _selectedEvent;
+    private TraceResponse _selectedTrace = default!;
+    private EventResponse _selectedEvent = default!;
     
-
+    
+    //chart data
+    
+    private string Width { get; set; } = "60%";
+    private double Rotation { get; set; } = 0;
+    private LabelIntersectAction Label { get; set; } = LabelIntersectAction.Trim;
+    private List<TraceChartData> ChartTraceData { get; set; } = new();
+    private List<TraceChartData> DummyChartData => new List<TraceChartData>
+    {
+        new TraceChartData { Day = "2022-01-01", Count = 10 },
+        new TraceChartData { Day = "2022-01-02", Count = 20 },
+        // Add more dummy data as needed
+    };
+    
+    
+    //event data:
+    private readonly string _explodeRadius = "20%";
+    private readonly string _eventPieRadius = "80%";
+    private readonly string _eventPieConnectorLength = "10px";
+    private const int StartAngle = 30;
+    private string Size { get; set; } = "15px";
+    
     protected override async Task OnInitializedAsync()
     {
         await LoadTraces();
@@ -173,20 +251,19 @@ else
         await InvokeAsync(StateHasChanged);
     }
     
-    private void OpenTraceModal(TraceResponse trace)
+    private async Task OpenTraceModal(TraceResponse trace)
     {
         _selectedTrace = trace;
         _showTraceModal = true;
-
-        StateHasChanged();
+        Console.WriteLine(trace);
+        await InvokeAsync(StateHasChanged);
     }
     
-    private void OpenEventModal(EventResponse @event)
+    private async Task OpenEventModal(EventResponse @event)
     {
         _selectedEvent = @event;
         _showEventModal = true;
-        Console.WriteLine("Ovde sam");
-        StateHasChanged();
+        await InvokeAsync(StateHasChanged);
     }
 
 
@@ -200,6 +277,12 @@ else
     {
         _showTraceModal = false;
         await InvokeAsync(StateHasChanged);
+    }
+
+    public class TraceChartData
+    {
+        public string Day { get; set; }
+        public int Count { get; set; }
     }
 
 }

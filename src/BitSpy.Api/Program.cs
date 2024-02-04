@@ -29,6 +29,8 @@ builder.Services.AddCors(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors();
+
 var app = builder.Build();
 
 await DatabaseInitializer.InitializeAsync(builder.Configuration);
@@ -38,4 +40,10 @@ app.UseCors("AllowAllOrigins");
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseEndpoints();
+app.UseCors(policyBuilder =>
+{
+    policyBuilder.AllowAnyOrigin();
+    policyBuilder.AllowAnyHeader();
+    policyBuilder.AllowAnyMethod();
+});
 app.Run();
