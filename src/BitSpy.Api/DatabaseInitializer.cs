@@ -27,6 +27,17 @@ public static class DatabaseInitializer
         _session = await cluster.ConnectAsync(keyspace);
         await CreateMetricsTableAsync();
         await CreateLogsTableAsync();
+        await CreateTraceTableAsync();
+    }
+    
+    private static async Task CreateTraceTableAsync()
+    {
+        var query = @"CREATE TABLE IF NOT EXISTS traces (
+                    id uuid,
+                    trace text,
+                    PRIMARY KEY (id)
+                  );";
+        await _session.ExecuteAsync(new SimpleStatement(query));
     }
 
     private static async Task<bool> KeyspaceExistsAsync(ICluster cluster, string keyspace)
