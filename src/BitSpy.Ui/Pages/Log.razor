@@ -2,29 +2,79 @@
 @using BitSpy.Ui.Response
 @inject HttpClient client
 
-<PageTitle>logs</PageTitle>
+<PageTitle>Logs</PageTitle>
 
 <h1>Logs</h1>
 
-@foreach (var log in logs)
+<div class="mb-3">
+    <label for="timeRange">Select Time Range:</label>
+    <select class="form-select" id="timeRange" @onchange="OnTimeRangeChange">
+        <option value="1">Today</option>
+        <option value="7">Last 7 days</option>
+        <option value="30">Last 30 days</option>
+        <!-- Add more options as needed -->
+    </select>
+</div>
+
+@if (logs.Any())
 {
-    <p class="border-1">
-        @log.Level - @log.Timestamp - @log.LogTemplate
-        @foreach (var value in log.LogValues)
-        {
-            @value
-        }
-    </p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Level</th>
+                <th>Timestamp</th>
+                <th>Log Template</th>
+                <th>Properties</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var log in logs)
+            {
+                <tr>
+                    <td>@log.Level</td>
+                    <td>@log.Timestamp</td>
+                    <td>@log.LogTemplate</td>
+                    <td>
+                        <ul>
+                            @foreach (var property in log.LogValues)
+                            {
+                                <li>@property</li>
+                            }
+                        </ul>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No logs found.</p>
 }
 
 @code {
     private List<LogResponse> logs = new();
+    private int selectedTimeRange = 1; // Default time range is today
 
     protected override async Task OnInitializedAsync()
     {
-        var startingDate = DateTime.Now.AddYears(-1);
-        var endingDate = DateTime.Now.AddYears(1);
+        await LoadLogs();
+    }
+
+    private async Task LoadLogs()
+    {
+        var startingDate = DateTime.Now.AddDays(-selectedTimeRange);
+        var endingDate = DateTime.Now;
         var response = await client.GetAsync($"{ApiConstants.ApiUrl}/logs?startingTimeStamp={startingDate}&endingTimeStamp={endingDate}");
         logs = await response.Content.ReadFromJsonAsync<List<LogResponse>>() ?? new List<LogResponse>();
+    }
+
+    private async Task OnTimeRangeChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value.ToString(), out int timeRange))
+        {
+            selectedTimeRange = timeRange;
+            await LoadLogs();
+        }
     }
 }
