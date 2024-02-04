@@ -6,7 +6,7 @@ namespace BitSpy.Api.Services;
 public interface ITraceService
 {
     Task<bool> SaveAsync(TraceDomain trace);
-    Task<bool> UpdateTraceAsync(string name, TraceDomain trace);
+    Task<bool> UpdateTraceAsync(string oldName, string newName);
     Task<bool> UpdateEventAsync(string name, TraceEventRelationshipDomain eventDomain);
     Task<bool> DeleteTraceAsync(string name);
     Task<bool> DeleteEventAsync(string name);

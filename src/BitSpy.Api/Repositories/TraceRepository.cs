@@ -468,13 +468,14 @@ public class TraceRepository : ITraceRepository
         };
     }
 
-    public async Task UpdateEventAsync(EventContract eventContract)
+    public async Task UpdateEventAsync(string eventName,EventContract eventContract)
     {
         var session = _driver.AsyncSession();
-        await session.RunAsync(
-            "MATCH (e:EventContract {Name: $name}) SET e.Message = $message, e.Duration = $duration, e.Attributes = $attributes",
+        var result = await session.RunAsync(
+            "MATCH (e:EventContract {Name: $eventName}) SET e.Name = $name, e.Message = $message, e.Duration = $duration, e.Attributes = $attributes",
             new Dictionary<string, object>
             {
+                { "eventName", eventName },
                 { "name", eventContract.Name },
                 { "message", eventContract.Message },
                 { "duration", eventContract.Duration },
@@ -482,13 +483,14 @@ public class TraceRepository : ITraceRepository
             });
     }
 
-    public async Task UpdateTraceAsync(TraceContract traceContract)
+    public async Task UpdateTraceAsync(string oldName,TraceContract traceContract)
     {
         var session = _driver.AsyncSession();
         await session.RunAsync(
-            "MATCH (t:TraceContract {Name: $name}) SET t.AverageDuration = $averageDuration, t.Attributes = $attributes, t.TraceCounter = $traceCounter",
+            "MATCH (t:TraceContract {Name: $oldName}) SET t.Name = $name, t.AverageDuration = $averageDuration, t.Attributes = $attributes, t.TraceCounter = $traceCounter",
             new Dictionary<string, object>
             {
+                { "oldName", oldName},
                 { "name", traceContract.Name },
                 { "averageDuration", traceContract.AverageDuration },
                 { "attributes", JsonSerializer.Serialize(traceContract.Attributes) },

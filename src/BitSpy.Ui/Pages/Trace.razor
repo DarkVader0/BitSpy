@@ -1,131 +1,138 @@
 ﻿@page "/traces"
 @using BitSpy.Ui.Response
 @using BitSpy.Ui.Components
-@using Syncfusion.Blazor.Charts;
+@using Syncfusion.Blazor.Charts
 @inject HttpClient Client
 
 <PageTitle>Traces</PageTitle>
 
 <h1>Traces</h1>
 
-
 <form @onsubmit="async () => await SearchTraces()">
-    <label>Duration</label>
-    <input type="number" @bind="_traceDuration" placeholder="Search by trace duration..."/>
-    <label>Trace counter</label>
-    <input type="number" @bind="_traceCounter" placeholder="Search by trace counter..."/>
-    <button type="submit">Search</button>
+    <div class="mb-3">
+        <label for="traceDuration" class="form-label">Duration</label>
+        <input type="number" class="form-control" @bind="_traceDuration" placeholder="Search by trace duration..." />
+    </div>
+    <div class="mb-3">
+        <label for="traceCounter" class="form-label">Trace counter</label>
+        <input type="number" class="form-control" @bind="_traceCounter" placeholder="Search by trace counter..." />
+    </div>
+    <button type="submit" class="btn btn-primary">Search</button>
 </form>
 
 @if (_traces.Count == 0)
 {
-    <p>
-        <em>There are no traces with this parameters</em>
+    <p class="mt-3">
+        <em>There are no traces with these parameters.</em>
     </p>
 }
 else
 {
-    <table class="table">
-        <thead>
-        <tr>
-            <th>Name</th>
-            <th>Duration</th>
-            <th>Attributes</th>
-            <th>Events</th>
-        </tr>
+    <table class="table table-bordered table-hover mt-3">
+        <thead class="table-dark">
+            <tr>
+                <th>Name</th>
+                <th>Duration</th>
+                <th>Attributes</th>
+                <th>Events</th>
+                <th>Edit</th>
+            </tr>
         </thead>
         <tbody>
-        @foreach (var trace in _traces)
-        {
-            <tr>
-                <td>@trace.Name</td>
-                <td>@trace.Duration.ToString()</td>
-                <td>
-                    <ul>
-                        @foreach (var a in trace.Attributes)
-                        {
-                            <li>@a.Name: @a.Value</li>
-                        }
-                    </ul>
-                </td>
-                <td>
-                    <ul>
-                        @foreach (var eventRelationship in trace.Events)
-                        {
-                            <li>@eventRelationship.Event.Name</li>
-                            <li>@eventRelationship.EventAvgDuration.ToString()</li>
-                        }
-                    </ul>
-                </td>
-                <td>
-                    <button @onclick="async () => await OpenTraceModal(trace)">Edit</button>
-                </td>
-
-            </tr>
-        }
+            @foreach (var trace in _traces)
+            {
+                <tr>
+                    <td>@trace.Name</td>
+                    <td>@trace.Duration.ToString()</td>
+                    <td>
+                        <ul class="list-unstyled">
+                            @foreach (var a in trace.Attributes)
+                            {
+                                <li>@a.Name: @a.Value</li>
+                            }
+                        </ul>
+                    </td>
+                    <td>
+                        <ul class="list-unstyled">
+                            @foreach (var eventRelationship in trace.Events)
+                            {
+                                <li>@eventRelationship.Event.Name</li>
+                                <li>@eventRelationship.EventAvgDuration.ToString()</li>
+                            }
+                        </ul>
+                    </td>
+                    <td>
+                        <button @onclick="async () => await OpenTraceModal(trace)" class="btn btn-warning">Edit</button>
+                    </td>
+                </tr>
+            }
         </tbody>
     </table>
 }
 
-@if(_showEventModal)
+@if (_showEventModal)
 {
-    Console.WriteLine("Renderujemo event modal");
+    Console.WriteLine("Rendering event modal");
     <EditEventModal Event="@_selectedEvent" OnClose="async () => await OnEventModalClosed()" />
 }
 
-
 @if (_showTraceModal)
 {
-    Console.WriteLine("Renderujemo trace modal");
     <EditTraceModal Trace="@_selectedTrace" OnClose="async () => await OnTraceModalClosed()" />
 }
 
 <h1>Events</h1>
 
 <form @onsubmit="async () => await SearchEvents()">
-    <label>Event duration</label>
-    <input type="number" @bind="_eventDuration" placeholder="Search by event duration..."/>
-    <label>Trace name</label>
-    <input type="text" @bind="_traceName" placeholder="Search by trace name..."/>
-    <button type="submit">Search</button>
+    <div class="mb-3">
+        <label for="eventDuration" class="form-label">Event duration</label>
+        <input type="number" class="form-control" @bind="_eventDuration" placeholder="Search by event duration..." />
+    </div>
+    <div class="mb-3">
+        <label for="traceName" class="form-label">Trace name</label>
+        <input type="text" class="form-control" @bind="_traceName" placeholder="Search by trace name..." />
+    </div>
+    <button type="submit" class="btn btn-primary">Search</button>
 </form>
-
 
 @if (_events.Count == 0)
 {
-    <em>There are no events with this parameters</em>
+    <p class="mt-3">
+        <em>There are no events with these parameters.</em>
+    </p>
 }
 else
 {
-    <table class="table">
-        <thead>
-        <tr>
-            <th>Name</th>
-            <th>Message</th>
-            <th>Duration</th>
-            <th>Attributes</th>
-        </tr>
+    <table class="table table-bordered table-hover mt-3">
+        <thead class="table-dark">
+            <tr>
+                <th>Name</th>
+                <th>Message</th>
+                <th>Duration(ms)</th>
+                <th>Attributes</th>
+                <th>Edit</th>
+            </tr>
         </thead>
         <tbody>
-        @foreach (var e in _events)
-        {
-            <tr>
-                <td>@e.Name</td>
-                <td>@e.Message</td>
-                <td>@e.Duration</td>
-                <td>
-                    <ul>
-                        @foreach (var a in e.Attributes)
-                        {
-                            <li>@a.Name: @a.Value</li>
-                        }
-                    </ul>
-                </td>
-                <td>
-                    <button @onclick="() => OpenEventModal(e)">Edit</button>
-                </td>
-            </tr>
-        }
+            @foreach (var e in _events)
+            {
+                <tr>
+                    <td>@e.Name</td>
+                    <td>@e.Message</td>
+                    <td>@e.Duration</td>
+                    <td>
+                        <ul class="list-unstyled">
+                            @foreach (var a in e.Attributes)
+                            {
+                                <li>@a.Name: @a.Value</li>
+                            }
+                        </ul>
+                    </td>
+                    <td>
+                        <button @onclick="() => OpenEventModal(e)" class="btn btn-warning">Edit</button>
+                    </td>
+                </tr>
+            }
         </tbody>
     </table>
 }
@@ -252,7 +259,6 @@ else
     {
         _selectedTrace = trace;
         _showTraceModal = true;
-        Console.WriteLine(trace);
         await InvokeAsync(StateHasChanged);
     }
     

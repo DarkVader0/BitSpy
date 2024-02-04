@@ -1,22 +1,27 @@
-﻿ @using BitSpy.Ui.Response
+﻿@using BitSpy.Ui.Response
 @using System.Net.Http.Headers
 @inject HttpClient HttpClient
 
-<div class="modal" tabindex="-1">
+<div class="modal fade show" id="myModal" style="display:block; background-color: rgba(10,10,10,.8);" aria-modal="true" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Edit Trace</h5>
-                <button type="button" class="btn-close" @onclick="Close"></button>
+                <h4 class="modal-title">Edit event</h4>
+                <button type="button" class="close" @onclick="@ModalCancel">&times;</button>
             </div>
             <div class="modal-body">
-                <EditForm Model="Trace" OnValidSubmit="UpdateTrace">
-                    <InputText id="name" @bind-Value="@Trace.Name" />
-                    <button type="submit">Update</button>
-                </EditForm>
+                <input type="text" @bind="@_newName"/>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" @onclick="Close">Close</button>
+                @switch (DialogType)
+                {
+                    case ModalDialogType.Ok:
+                        <button type="button" class="btn btn-primary" @onclick=@(async () => await ModalOk())>OK</button>
+                        break;
+                    case ModalDialogType.Cancel:
+                        <button type="button" class="btn" @onclick="@(async () => await ModalCancel())">Cancel</button>
+                        break;
+                }
             </div>
         </div>
     </div>
@@ -24,21 +29,42 @@
 
 @code {
 
-    [Parameter]
-    public TraceResponse Trace { get; set; }
+    [Parameter] public TraceResponse Trace { get; set; } = default!;
+    [Parameter] public ModalDialogType DialogType { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
 
-    [Parameter]
-    public EventCallback OnClose { get; set; }
-
-    private void Close()
+    private string _newName = string.Empty;
+    
+    protected override void OnInitialized()
     {
-        OnClose.InvokeAsync();
+        _newName = Trace.Name;
+        base.OnInitialized();
     }
-
+    
     private async Task UpdateTrace()
     {
-        var response = await HttpClient.PutAsJsonAsync($"{ApiConstants.ApiUrl}/traces/{Trace.Name}", Trace);
-
-        Close();
+        if (_newName.Length > 0 && Trace.Name != _newName)
+        {
+            string oldName = Trace.Name;
+            Trace.Name = _newName;
+            var response = await HttpClient.PutAsJsonAsync($"{ApiConstants.ApiUrl}/traces/{oldName}", _newName);
+        }
     }
+    
+    private Task ModalCancel()
+    {
+        return OnClose.InvokeAsync();
+    }
+
+    private async Task ModalOk()
+    {
+        await UpdateTrace();
+        await OnClose.InvokeAsync();
+    }
+    public enum ModalDialogType
+    {
+        Ok,
+        Cancel
+    }
+
 }

@@ -37,8 +37,8 @@ public interface ITraceRepository
     Task<List<TraceDomain>> GetTracesForIpAsync(string ip);
     Task<TraceContract?> GetTraceByNameAsync(string name);
     Task<EventContract?> GetEventByNameAsync(string name);
-    Task UpdateEventAsync(EventContract eventContract);
-    Task UpdateTraceAsync(TraceContract traceContract);
+    Task UpdateEventAsync(string eventName,EventContract eventContract);
+    Task UpdateTraceAsync(string oldName,TraceContract traceContract);
     Task DeleteTraceAsync(string name);
     Task DeleteEventAsync(string name);
 }

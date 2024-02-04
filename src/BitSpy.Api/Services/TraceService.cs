@@ -104,21 +104,18 @@ public sealed class TraceService : ITraceService
         return true;
     }
 
-    public async Task<bool> UpdateTraceAsync(string name, TraceDomain trace)
+    public async Task<bool> UpdateTraceAsync(string oldName, string newName)
     {
-        var existingTrace = await _traceRepository.GetTraceByNameAsync(name);
+        var existingTrace = await _traceRepository.GetTraceByNameAsync(oldName);
 
         if (existingTrace is null)
         {
             return false;
         }
+        
+        existingTrace.Name = newName;
 
-        existingTrace.Attributes = trace.Attributes;
-        existingTrace.AverageDuration = trace.Duration;
-        existingTrace.Name = trace.Name;
-
-        await _traceRepository.UpdateTraceAsync(existingTrace);
-
+        await _traceRepository.UpdateTraceAsync(oldName, existingTrace);
         return true;
     }
 
@@ -135,7 +132,7 @@ public sealed class TraceService : ITraceService
         existingEvent.Message = eventDomain.Event.Message;
         existingEvent.Attributes = eventDomain.Event.Attributes;
 
-        await _traceRepository.UpdateEventAsync(existingEvent);
+        await _traceRepository.UpdateEventAsync(name,existingEvent);
 
         return true;
     }

@@ -16,7 +16,7 @@ public class TraceEndpoints : IEndpoint
         app.MapGet( "/bottleneck/traces", GetBottleneckTraces);
         app.MapGet("/bottleneck/events", GetBottleneckEvents);
         app.MapGet(BaseRoute + "/ip/{ip}", GetTracesForIp);
-        app.MapPut("/traces/{traceName}", UpdateTrace);
+        app.MapPut("/traces/{oldName}", UpdateTrace);
         app.MapPut("/events/{eventName}", UpdateEvent);
         app.MapDelete("/traces/{traceName}", DeleteTrace);
         app.MapDelete("/events/{eventName}", DeleteEvent);
@@ -32,11 +32,11 @@ public class TraceEndpoints : IEndpoint
             : Results.BadRequest();
     }
 
-    private static async Task<IResult> UpdateTrace(string traceName,
-        [FromBody] TraceRequest traceRequest,
+    private static async Task<IResult> UpdateTrace(string oldName,
+        [FromBody]string newName,
         ITraceService traceService)
     {
-        var result = await traceService.UpdateTraceAsync(traceName, traceRequest.ToDomain());
+        var result = await traceService.UpdateTraceAsync(oldName, newName);
         return result
             ? Results.Ok()
             : Results.BadRequest();
